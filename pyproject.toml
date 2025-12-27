@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "imvi"
+version = "0.1.0"
+description = "ImageViewer Kiosk - a framebuffer image viewer for raspberry"
+authors = ["Joerg Neulist <21063011+joergneulist@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
