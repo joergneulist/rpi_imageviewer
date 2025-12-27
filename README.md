@@ -8,7 +8,7 @@ This project is an attempt to turn an old screen and a Raspberry Pi into a stand
 * An old screen, a Raspberry Pi, one or two buttons, a soldering iron
 * The following projects and the capability to build them:
    * https://github.com/godspeed1989/fbv
-   * ...
+   * https://github.com/ferk/udev-media-automount
  
 * poppler-utils
 * python3
