@@ -1,25 +1,26 @@
 {
-	'pins': {
-		'mode': 2,
-		'select': 3
+	"pins": {
+		"mode": 2,
+		"select": 3
 	},
 	
-	'view': {
-		'autorotate': true
+	"view": {
+		"autorotate": true
 	},
 	
-	'types': {
-		'jpg': {
-			'view': ['/usr/bin/fbv', '#'],
-			'vrot': ['/usr/bin/fbv', '-o', '1', '#']},
-		'jpeg': {
-			'view': ['/usr/bin/fbv', '#'],
-			'vrot': ['/usr/bin/fbv', '-o', '1', '#']},
-		'png': {
-			'view': ['/usr/bin/fbv', '#'],
-			'vrot': ['/usr/bin/fbv', '-o:1', '#']},
-		'pdf': {
-			'prep': ['conv.pdf', '#add_dir']}
+	"types": {
+		".jpg": {
+			"view": ["/usr/bin/fbv", "#"],
+			"vrot": ["/usr/bin/fbv", "-o", "1", "#"]},
+		".jpeg": {
+			"view": ["/usr/bin/fbv", "#"],
+			"vrot": ["/usr/bin/fbv", "-o", "1", "#"]},
+		".png": {
+			"view": ["/usr/bin/fbv", "#"],
+			"vrot": ["/usr/bin/fbv", "-o:1", "#"]},
+		".pdf": {
+			"prep_pre": ["conv.pdf", "#"],
+			"prep_post": "add_list"}
 	}
 }
 			
