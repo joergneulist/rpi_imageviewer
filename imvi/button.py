@@ -1,5 +1,5 @@
 from gpiozero import Button
-from time import sleep, time
+from time import time
 
 
 class ButtonHandler:
@@ -14,13 +14,11 @@ class ButtonHandler:
         self.btn.when_pressed = self._pressed
         self.btn.when_released = self._released
 
-
-
     def _held(self):
         if self.time_pressed is not None:
             self.cb_long(self.name, time() - self.time_pressed)
             self.time_pressed = False
-    
+
     def _pressed(self):
         self.time_pressed = time()
 
@@ -28,15 +26,3 @@ class ButtonHandler:
         if self.time_pressed is not None:
             self.cb_short(self.name, time() - self.time_pressed)
             self.time_pressed = None
-
-
-def cb_long(name, duration):
-    print(f'long press: {name} pressed for {duration} seconds')
-
-def cb_short(name, duration):
-    print(f'short press: {name} pressed for {duration} seconds')
-
-
-a = ButtonHandler(2, 'step', cb_short, 3, cb_long)
-b = ButtonHandler(3, 'mode', cb_short, 3, cb_long)
-input()
