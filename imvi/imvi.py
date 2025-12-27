@@ -6,11 +6,11 @@ import json
 from pathlib import Path
 from time import sleep
 
-from imvi.statemachine import StateMachine
+from statemachine import StateMachine
 
 
 MEDIA_PATH = Path('/media')
-CONFIG_PATH = Path('../etc/config.json')
+CONFIG_PATH = Path('etc/config.json')
 
 
 CFG_KEY_PINS = 'pins'

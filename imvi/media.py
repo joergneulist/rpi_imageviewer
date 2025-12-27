@@ -4,7 +4,7 @@
 from collections import deque
 from pathlib import Path
 
-from imvi.tools import execute
+from tools import execute
 
 
 class FileList:
@@ -52,7 +52,7 @@ class FileList:
 
 
     def replace(self, file_list):
-        active_file = self.files.get_file()
+        active_file = self.get_file()
 
         self.files = file_list
         self.n = len(self.files)

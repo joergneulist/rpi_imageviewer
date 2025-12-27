@@ -1,7 +1,7 @@
 {
 	"pins": {
 		"mode": 2,
-		"select": 3
+		"step": 3
 	},
 	
 	"view": {

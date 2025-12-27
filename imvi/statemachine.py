@@ -6,9 +6,9 @@ import json
 from pathlib import Path
 from time import sleep
 
-from imvi.button import ButtonHandler
-from imvi.media import FileList
-from imvi.tools import execute
+from button import ButtonHandler
+from media import FileList
+from tools import execute
 
 
 BTN_STEP = 'step'
