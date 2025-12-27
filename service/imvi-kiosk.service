@@ -1,0 +1,14 @@
+[Unit]
+Description=ImageViewer Kiosk - a framebuffer image viewer for raspberry pi
+After=basic.target
+
+[Service]
+User={USER}
+WorkingDirectory=/home/{USER}
+ExecStart=/home/{USER}/.local/bin/imvi.py
+Type=simple
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
