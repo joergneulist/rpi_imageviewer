@@ -1,0 +1,25 @@
+{
+	'pins': {
+		'mode': 2,
+		'select': 3
+	},
+	
+	'view': {
+		'autorotate': true
+	},
+	
+	'types': {
+		'jpg': {
+			'view': ['/usr/bin/fbv', '#'],
+			'vrot': ['/usr/bin/fbv', '-o', '1', '#']},
+		'jpeg': {
+			'view': ['/usr/bin/fbv', '#'],
+			'vrot': ['/usr/bin/fbv', '-o', '1', '#']},
+		'png': {
+			'view': ['/usr/bin/fbv', '#'],
+			'vrot': ['/usr/bin/fbv', '-o:1', '#']},
+		'pdf': {
+			'prep': ['conv.pdf', '#add_dir']}
+	}
+}
+			
