@@ -1,0 +1,4 @@
+#!/bin/bash
+BASE=$(mktemp -d)/page
+pdftoppm "$1" -png "$BASE"
+ls -1 "$BASE"*
