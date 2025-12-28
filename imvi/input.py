@@ -1,5 +1,6 @@
 from gpiozero import Button
 from time import time
+from pynput import keyboard
 
 
 class ButtonHandler:
@@ -26,3 +27,19 @@ class ButtonHandler:
         if self.time_pressed is not None:
             self.cb_short(self.name, time() - self.time_pressed)
             self.time_pressed = None
+
+
+class KeyboardHandler:
+    def __init__(self, handler_list):
+        self.listener = keyboard.Listener(on_press=self.key_event)
+        self.keys = {}
+        for handler in handler_list:
+            key = handler.key
+            if len(handler.key) > 1:
+                key = getattr(keyboard.Key, handler['key'])
+            self.keys[key] = { 'name': handler['name'], 'cb': handler['callback'] }
+                
+
+    def key_event(self, key):
+        if key in self.keys:
+            self.keys[key]['cb'](self.keys[key]['name'], 0)

@@ -8,8 +8,9 @@ from tools import execute
 
 
 class FileList:
-    def __init__(self, config):
+    def __init__(self, config, cb_update):
         self.config = config
+        self.cb_update = cb_update
         self.files = []
         self.n = 0
         self.viewed = 0
@@ -58,5 +59,8 @@ class FileList:
         self.n = len(self.files)
         try:
             self.viewed = self.files.index(active_file)
+            self.cb_update(self.n, True)
         except:
             self.viewed = 0
+            self.cb_update(self.n, True)
+       
