@@ -14,7 +14,7 @@ from tools import execute
 BTN_STEP = 'step'
 BTN_MODE = 'mode'
 
-LONG_HOLD_TIME_SEC = 3
+LONG_HOLD_TIME_SEC = 1
 
 
 class StateMachine:
