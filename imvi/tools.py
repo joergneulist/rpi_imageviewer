@@ -1,4 +1,5 @@
 from subprocess import Popen, run
+from time import time
 
 
 def find(mylist, value):
@@ -30,11 +31,17 @@ class Executor:
 
     def kill(self):
         if self.process is not None:
-            self.process.kill()
+            print(f'killing process {self.process.pid}')
+            now = time.time()
+            self.process.terminate()
+            self.process.wait()
+            print(f'-> dead after {time.time() - now:.2f} seconds')
             self.process = None
 
     def launch(self, args):
+        print(f'launching {args}')
         self.process = Popen(args)
+        print(f'-> process {self.process.pid}')
 
     def replace(self, command, file):
         if self.process is not None:
@@ -44,4 +51,3 @@ class Executor:
 
         self.file = file
         self.launch(insert_file(command, file))
-
