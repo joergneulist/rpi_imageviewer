@@ -18,7 +18,7 @@ def insert_file(command, file):
 
 class Executor:
     @staticmethod
-    def get_stdout(command, file):
+    def run(command, file):
         result = run(insert_file(command, file), capture_output=True, text=True)
         return result.stdout.strip().splitlines()
 

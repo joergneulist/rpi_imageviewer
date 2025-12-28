@@ -70,4 +70,4 @@ class FileList:
     def view(self):
         file = self.get_file()
         cfg = self.config[file.suffix.lower()]
-        self.process.replace(cfg['view'], file)
+        self.process.run(cfg['view'], file)
