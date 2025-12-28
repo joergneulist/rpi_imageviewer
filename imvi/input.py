@@ -26,5 +26,3 @@ class ButtonHandler:
         if self.time_pressed is not None:
             self.cb_short(self.name, time() - self.time_pressed)
             self.time_pressed = None
-
-

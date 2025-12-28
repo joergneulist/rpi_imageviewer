@@ -71,4 +71,3 @@ class FileList:
         file = self.get_file()
         cfg = self.config[file.suffix.lower()]
         self.process.replace(cfg['view'], file)
-

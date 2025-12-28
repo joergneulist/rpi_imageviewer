@@ -52,8 +52,7 @@ class StateMachine:
         if self.state == StateMachine.IDLE:
             print('State: IDLE - no media loaded')
         elif self.state == StateMachine.VIEW:
-            current_file = self.files.get_file()
-            print(f'State: VIEW - viewing file {self.files.active + 1}/{self.files.n}: {current_file}')
+            print(f'State: VIEW - viewing file {self.files.active + 1}/{self.files.n}: {self.files.get_file()}')
             self.files.view()
         elif self.state == StateMachine.INFO:
             print(f'State: INFO - browsing {self.files.n} files, currently at {self.files.active + 1}')
@@ -94,4 +93,3 @@ class StateMachine:
             if self.state == StateMachine.IDLE or not persistent:
                 self.state = StateMachine.VIEW
         self.update_view()
-
