@@ -12,14 +12,18 @@ def find(mylist, value):
 def insert_file(command, file):
     cmd = command.copy()
     while (idx := find(cmd, '#')) is not None:
-        command[idx] = file
+        cmd[idx] = file
     return cmd
 
 
 class Executor:
     @staticmethod
     def run(command, file):
-        result = run(insert_file(command, file), capture_output=True, text=True)
+        print(f'run(command={command}, file={file})')
+        args = insert_file(command, file)
+        print(' - executing: ', args)
+        result = run(args, capture_output=True, text=True)
+        print(' -> result {result.returncode}, args {result.args}')
         return result.stdout.strip().splitlines()
 
     def __init__(self):
