@@ -1,9 +1,4 @@
 {
-	"keybindings": {
-		"mode": [" ", "enter"],
-		"step": ["right", "left"]
-	},
-	
 	"pins": {
 		"mode": 2,
 		"step": 3

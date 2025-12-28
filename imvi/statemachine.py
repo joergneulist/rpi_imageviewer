@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from time import sleep
 
-from input import ButtonHandler, KeyboardHandler
+from input import ButtonHandler
 from media import FileList
 from tools import execute
 
@@ -41,17 +41,12 @@ class StateMachine:
         self.config = config
         self.files = FileList(config['types'], self.cb_media_update)
         self.state = StateMachine.IDLE
+        self.task = None
 
         # register triggers for media control
         self.btn_handlers = {}
-        key_handler_config = []
         for button in [BTN_MODE, BTN_STEP]:
             self.btn_handlers[button] = ButtonHandler(self.config['pins'][button], button, self.cb_btn_short, LONG_HOLD_TIME_SEC, self.cb_btn_long)
-            key_handler_config += [
-                { 'key': self.config['keybindings'][button][0], 'name': button, 'callback': self.cb_btn_short },
-                { 'key': self.config['keybindings'][button][1], 'name': button, 'callback': self.cb_btn_long },
-            ]
-        self.key_handler = KeyboardHandler(key_handler_config)
 
 
     def update_view(self):
@@ -96,5 +91,7 @@ class StateMachine:
         if count == 0:
             self.state = StateMachine.IDLE
         else:
-            if not persistent:
+            if self.state == StateMachine.IDLE or not persistent:
                 self.state = StateMachine.VIEW
+        self.update_view()
+
