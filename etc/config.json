@@ -10,16 +10,16 @@
 	
 	"types": {
 		".jpg": {
-			"view": ["/usr/bin/fbv", "#"],
-			"vrot": ["/usr/bin/fbv", "-o", "1", "#"]},
+			"view": ["/usr/local/bin/fbv", "#"],
+			"vrot": ["/usr/local/bin/fbv", "-o", "1", "#"]},
 		".jpeg": {
-			"view": ["/usr/bin/fbv", "#"],
-			"vrot": ["/usr/bin/fbv", "-o", "1", "#"]},
+			"view": ["/usr//local/bin/fbv", "#"],
+			"vrot": ["/usr/local/bin/fbv", "-o", "1", "#"]},
 		".png": {
-			"view": ["/usr/bin/fbv", "#"],
-			"vrot": ["/usr/bin/fbv", "-o:1", "#"]},
+			"view": ["/usr/local/bin/fbv", "#"],
+			"vrot": ["/usr/local/bin/fbv", "-o:1", "#"]},
 		".pdf": {
-			"prep_pre": ["conv.pdf", "#"],
+			"prep_pre": ["conv_pdf", "#"],
 			"prep_post": "add_list"}
 	}
 }
