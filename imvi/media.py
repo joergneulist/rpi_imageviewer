@@ -4,7 +4,7 @@
 from collections import deque
 from pathlib import Path
 
-from tools import execute
+from tools import Executor
 
 
 class FileList:
@@ -13,22 +13,23 @@ class FileList:
         self.cb_update = cb_update
         self.files = []
         self.n = 0
-        self.viewed = 0
+        self.active = 0
+        self.process = Executor()
 
 
     def get_file(self):
         if self.n:
-            return self.files[self.viewed]
+            return self.files[self.active]
 
 
     def next(self):
         if self.n:
-            self.viewed = (self.viewed + 1) % len(self.files)
+            self.active = (self.active + 1) % len(self.files)
 
 
     def prev(self):
         if self.n:
-            self.viewed = (self.viewed - 1) % len(self.files)
+            self.active = (self.active - 1) % len(self.files)
 
 
     def clean_filelist(self, file_list):
@@ -42,10 +43,11 @@ class FileList:
         for file in file_list:
             cfg = self.config[file.suffix.lower()]
             if 'prep_pre' in cfg:
-                result = execute(cfg['prep_pre'], file)
-                if cfg['prep_post'] == 'add_list':
-                    for prep_file in result:
-                        view_list.append(Path(prep_file))
+                pass
+#                result = execute(cfg['prep_pre'], file)
+#                if cfg['prep_post'] == 'add_list':
+#                    for prep_file in result:
+#                        view_list.append(Path(prep_file))
             else:
                 view_list.append(file)
 
@@ -58,9 +60,15 @@ class FileList:
         self.files = file_list
         self.n = len(self.files)
         try:
-            self.viewed = self.files.index(active_file)
+            self.active = self.files.index(active_file)
             self.cb_update(self.n, True)
         except:
-            self.viewed = 0
+            self.active = 0
             self.cb_update(self.n, False)
-       
+ 
+
+    def view(self):
+        file = self.get_file()
+        cfg = self.config[file.suffix.lower()]
+        self.process.replace(cfg['view'], file)
+

@@ -8,7 +8,6 @@ from time import sleep
 
 from input import ButtonHandler
 from media import FileList
-from tools import execute
 
 
 BTN_STEP = 'step'
@@ -54,9 +53,10 @@ class StateMachine:
             print('State: IDLE - no media loaded')
         elif self.state == StateMachine.VIEW:
             current_file = self.files.get_file()
-            print(f'State: VIEW - viewing file {self.files.viewed + 1}/{self.files.n}: {current_file}')
+            print(f'State: VIEW - viewing file {self.files.active + 1}/{self.files.n}: {current_file}')
+            self.files.view()
         elif self.state == StateMachine.INFO:
-            print(f'State: INFO - browsing {self.files.n} files, currently at {self.files.viewed + 1}')
+            print(f'State: INFO - browsing {self.files.n} files, currently at {self.files.active + 1}')
             for file in self.files.files:
                 print(f' - {file}')
 
