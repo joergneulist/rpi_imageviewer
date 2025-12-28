@@ -10,14 +10,11 @@
 	
 	"types": {
 		".jpg": {
-			"view": ["/usr/local/bin/fbv", "#"],
-			"vrot": ["/usr/local/bin/fbv", "-o", "1", "#"]},
+			"view": ["/usr/local/bin/fbv", "-y", "#"]},
 		".jpeg": {
-			"view": ["/usr//local/bin/fbv", "#"],
-			"vrot": ["/usr/local/bin/fbv", "-o", "1", "#"]},
+			"view": ["/usr//local/bin/fbv", "-y", "#"]},
 		".png": {
-			"view": ["/usr/local/bin/fbv", "#"],
-			"vrot": ["/usr/local/bin/fbv", "-o:1", "#"]},
+			"view": ["/usr/local/bin/fbv", "-y", "#"]},
 		".pdf": {
 			"prep_pre": ["conv_pdf", "#"],
 			"prep_post": "add_list"}
