@@ -1,5 +1,4 @@
-#!/usr/bin/python
-
+from subprocess import run
 
 def find(mylist, value):
     try:
@@ -11,5 +10,5 @@ def find(mylist, value):
 def execute(command, file):
     while (idx := find(command, '#')) is not None:
         command[idx] = file
-    # TODO actually execute command and return result
-    return None
+    result = run(command, capture_output=True, text=True)
+    return result.stdout.strip().splitlines()
