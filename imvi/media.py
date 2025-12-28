@@ -62,5 +62,5 @@ class FileList:
             self.cb_update(self.n, True)
         except:
             self.viewed = 0
-            self.cb_update(self.n, True)
+            self.cb_update(self.n, False)
        
