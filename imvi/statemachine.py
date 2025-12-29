@@ -16,19 +16,8 @@ BTN_MODE = 'mode'
 
 class StateMachine:
     '''State machine for the image viewer
-
-    States are:
-    - IDLE: no media loaded
-    - VIEW: view images
-    - INFO: select from list of images
-
-    State transitions:
-    - idle -> viewing: load media
-    - viewing -> idle: unload media
-    - viewing -> viewing: step button [short press: forward, long press: backward]
-    - viewing -> browsing: mode button [short or long press]
-    - browsing -> browsing: step button cycles through current depth, mode cycles depth
-    - browsing -> viewing: mode button [long press]
+    
+    Full State Machine TODO. Currently, the two buttons just step through the images backwards and forwards.
     '''
     IDLE = 'idle'
     VIEW = 'view'
@@ -52,21 +41,14 @@ class StateMachine:
         elif self.state == StateMachine.VIEW:
             print(f'State: VIEW - viewing file {self.files.active + 1}/{self.files.n}: {self.files.get_file()}')
             self.files.view()
-        elif self.state == StateMachine.INFO:
-            print(f'State: INFO - browsing {self.files.n} files, currently at {self.files.active + 1}')
-            for file in self.files.files:
-                print(f' - {file}')
 
 
     def cb_btn_long(self, name, duration):
         print(f'long press: {name} pressed for {duration} seconds')
         if name == BTN_STEP:
-            self.files.prev()
+            self.files.next()
         elif name == BTN_MODE:
-            if self.state == StateMachine.VIEW:
-                self.state = StateMachine.INFO
-            elif self.state == StateMachine.INFO:
-                self.state = StateMachine.VIEW
+            self.files.prev()
         self.update_view()
 
 
@@ -75,10 +57,7 @@ class StateMachine:
         if name == BTN_STEP:
             self.files.next()
         elif name == BTN_MODE:
-            if self.state == StateMachine.VIEW:
-                self.state = StateMachine.INFO
-            elif self.state == StateMachine.INFO:
-                self.state = StateMachine.VIEW
+            self.files.prev()
         self.update_view()
 
 
