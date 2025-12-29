@@ -6,11 +6,11 @@
 
 	"types": {
 		".jpg": {
-			"view": ["/usr/local/bin/fbv", "-y", "#"]},
+			"view": ["/usr/local/bin/fbv", "-ey", "#"]},
 		".jpeg": {
-			"view": ["/usr//local/bin/fbv", "-y", "#"]},
+			"view": ["/usr//local/bin/fbv", "-ey", "#"]},
 		".png": {
-			"view": ["/usr/local/bin/fbv", "-y", "#"]},
+			"view": ["/usr/local/bin/fbv", "-ey", "#"]},
 		".pdf": {
 			"prep_pre": ["conv_pdf", "#"],
 			"prep_post": "add_list"}
