@@ -1,10 +1,22 @@
-#!/usr/bin/python
-
-
 from collections import deque
 from pathlib import Path
+from subprocess import run
 
-from tools import Executor
+
+def list_find(mylist, value):
+    try:
+        return mylist.index(value)
+    except:
+        return None
+
+
+def execute(command, file):
+    args = command.copy()
+    while (idx := list_find(args, '#')) is not None:
+        args[idx] = file
+
+    result = run(args, capture_output=True, text=True)
+    return result.stdout.strip().splitlines()
 
 
 class FileList:
@@ -14,7 +26,6 @@ class FileList:
         self.files = []
         self.n = 0
         self.active = 0
-        self.process = Executor()
 
 
     def get_file(self):
@@ -70,4 +81,4 @@ class FileList:
     def view(self):
         file = self.get_file()
         cfg = self.config[file.suffix.lower()]
-        self.process.run(cfg['view'], file)
+        execute(cfg['view'], file)

@@ -3,11 +3,7 @@
 		"mode": 2,
 		"step": 3
 	},
-	
-	"view": {
-		"autorotate": true
-	},
-	
+
 	"types": {
 		".jpg": {
 			"view": ["/usr/local/bin/fbv", "-y", "#"]},
@@ -20,4 +16,3 @@
 			"prep_post": "add_list"}
 	}
 }
-			

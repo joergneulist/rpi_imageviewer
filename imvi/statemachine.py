@@ -13,8 +13,6 @@ from media import FileList
 BTN_STEP = 'step'
 BTN_MODE = 'mode'
 
-LONG_HOLD_TIME_SEC = 1
-
 
 class StateMachine:
     '''State machine for the image viewer
@@ -45,7 +43,7 @@ class StateMachine:
         # register triggers for media control
         self.btn_handlers = {}
         for button in [BTN_MODE, BTN_STEP]:
-            self.btn_handlers[button] = ButtonHandler(self.config['pins'][button], button, self.cb_btn_short, LONG_HOLD_TIME_SEC, self.cb_btn_long)
+            self.btn_handlers[button] = ButtonHandler(self.config['pins'][button], button, self.cb_btn_short, self.cb_btn_long)
 
 
     def update_view(self):

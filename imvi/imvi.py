@@ -15,7 +15,6 @@ CONFIG_PATH = Path('etc/config.json')
 
 CFG_KEY_PINS = 'pins'
 CFG_KEY_TYPES = 'types'
-CFG_KEY_VIEW = 'view'
 
 
 def read_config(path):
@@ -25,8 +24,6 @@ def read_config(path):
     
     assert CFG_KEY_PINS in cfg
     assert CFG_KEY_TYPES in cfg
-    assert CFG_KEY_VIEW in cfg
-    
     return cfg
 
 
@@ -52,14 +49,12 @@ if __name__ == '__main__':
     
     # This main loop controls watching for file changes. The actual logic is
     # implemented in the State Machine, triggered by the button callbacks.
-    filestate = 0
+    filehash = 0
     while True:
         sleep(5)
         files = list(main.files.clean_filelist(gather_files(MEDIA_PATH)))
-        new_filestate = hash(frozenset(files))
-        if new_filestate != filestate:
-            filestate = new_filestate
-            print(f'found {len(files)} files, state {filestate}:', files)
+        new_filehash = hash(frozenset(files))
+        if new_filehash != filehash:
+            filehash = new_filehash
+            print(f'found {len(files)} files, state {filehash}:', files)
             main.files.load(files)
-    
-    print('exiting imvi main loop')
