@@ -9,10 +9,8 @@ This project is an attempt to turn an old screen and a Raspberry Pi into a stand
 * The following projects and the capability to build them:
    * https://github.com/godspeed1989/fbv
    * https://github.com/ferk/udev-media-automount
- 
 * poppler-utils
 * python3
-* ...and the python libraries linked in the repo
 
 
 ## Setup
@@ -21,31 +19,43 @@ You'll need :
 
 1. A USB automounter
 
-That's what  ... does. Build & install.
+That's what  [```udev```](https://github.com/ferk/udev-media-automount) does. Build & install this package, and all USB media will automatically appear in ```/media```.
    
-2. A way to run the python project immediately on start-up
-
-**TODO**
- 
-3. Tooling to enable the python tool to actually display stuff on the framebuffer
+2. Tooling to enable the python tool to actually display stuff on the framebuffer
 
 * [```fbv```](https://github.com/godspeed1989/fbv): Build and install (It's not very actively maintained, so a glance at the PRs might save you from having to fix stuff yourself).
-```sudo apt install poppler-utils```: The project uses pdftoppm to make PDF documents visible as well. If you don't use that, you don't need this library.
+* ```sudo apt install poppler-utils```: The project can use pdftoppm to make PDF documents visible as well. If you don't use that, you don't need this library.
+
+3. A way to run the python project immediately on start-up
+
+We'll install a service for that: ```make kiosk```. If at any time you want to stop this from autostarting, just go: ```make nokiosk```.
 
 
 ## The Project
 
 ### Configuration
 
-The config file determines the behaviour.
-**TODO** definition
+The config file is a json file that determines the behaviour.
 
-### Scripting
+In the "pins" key, you need to define the GPIOs connected to the two buttons "mode" and "step". In the "types" key, you'll define the commands to be run to display an image, substituting ```#``` for the file name. A full example:
 
-A short script takes the PDF handling away from the Python code.
-**TODO**
+```
+{
+	"pins": {
+		"mode": 2,
+		"step": 3
+	},
+
+	"types": {
+		".jpg":  { "view": ["/usr/local/bin/fbv", "-ey", "#"]},
+		".jpeg": { "view": ["/usr/local/bin/fbv", "-ey", "#"]},
+		".png":  { "view": ["/usr/local/bin/fbv", "-ey", "#"]},
+	}
+}
+```
+
 
 ### Python Code
 
-**TODO** poetry or requirements? How to install?
+```make install ``` will create an environment ```~/imvi``` and install the imvi package there.
 
