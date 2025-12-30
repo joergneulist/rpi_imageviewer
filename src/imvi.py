@@ -10,7 +10,7 @@ from statemachine import StateMachine
 
 
 MEDIA_PATH = Path('/media')
-CONFIG_PATH = Path('~/.imvi.json')
+CONFIG_PATH = Path('~/.imvi.json').expanduser()
 
 
 CFG_KEY_PINS = 'pins'

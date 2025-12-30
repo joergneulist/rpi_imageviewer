@@ -2,6 +2,7 @@
 
 
 install:
+	@install -m444 etc/config/imvi.json ~/.imvi.json
 	@python3 -m venv ~/imvi --clear --symlinks
 	@~/imvi/bin/pip3 install .
 
