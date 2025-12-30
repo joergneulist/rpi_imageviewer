@@ -8,7 +8,7 @@
 		".jpg": {
 			"view": ["/usr/local/bin/fbv", "-ey", "#"]},
 		".jpeg": {
-			"view": ["/usr//local/bin/fbv", "-ey", "#"]},
+			"view": ["/usr/local/bin/fbv", "-ey", "#"]},
 		".png": {
 			"view": ["/usr/local/bin/fbv", "-ey", "#"]},
 		".pdf": {

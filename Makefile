@@ -14,13 +14,8 @@ install: wheel
 	install -D -m 755 bin/kiosk $(LAUNCHER)
 
 
-imvi.service: service/imvi.service
-	cp $< $@
-	@echo "ExecStart=$(LAUNCHER)" >> $@"
-
-
-kiosk: imvi.service install
-	sudo cp $< /etc/systemd/system/$(SRVC_NAME).service
+kiosk: imvi.service
+	sudo cp service/imvi.service /etc/systemd/system/$(SRVC_NAME).service
 	systemctl enable --now $(SRVC_NAME).service
 
 nokiosk:
