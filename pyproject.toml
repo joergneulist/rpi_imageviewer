@@ -9,6 +9,7 @@ requires-python = ">= 3.8"
 authors = [{name = "Joerg Neulist", email = "21063011+joergneulist@users.noreply.github.com"}]
 license = "MIT"
 readme = "README.md"
+requires = [ "gpiozero" ]
 
 [project.scripts]
 imvi = "imvi:main"

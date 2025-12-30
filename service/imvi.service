@@ -10,4 +10,4 @@ User={USER}
 WorkingDirectory=/home/{USER}
 Type=simple
 Restart=on-failure
-ExecStart=/home/{USER}/imvi/bin/python3 imvi
+ExecStart=/home/{USER}/imvi/bin/python3 -m imvi

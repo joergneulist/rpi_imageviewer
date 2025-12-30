@@ -3,7 +3,7 @@
 
 install:
 	python3 -m venv ~/imvi --clear --symlinks
-	~/imvi/bin/pip install .
+	~/imvi/bin/pip3 install .
 
 
 kiosk: imvi.service
