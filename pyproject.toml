@@ -2,7 +2,7 @@
 name = "imvi"
 version = "0.1.0"
 requires-python = ">= 3.8"
-authors = ["Joerg Neulist <21063011+joergneulist@users.noreply.github.com>"]
+authors = [{name = "Joerg Neulist", email = "21063011+joergneulist@users.noreply.github.com"}]
 license = "MIT"
 readme = "README.md"
 
