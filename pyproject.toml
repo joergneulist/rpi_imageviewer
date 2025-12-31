@@ -11,5 +11,3 @@ license = "MIT"
 readme = "README.md"
 dependencies = [ "gpiozero" ]
 
-[project.scripts]
-imvi = "imvi:main"
