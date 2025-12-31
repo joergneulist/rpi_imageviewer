@@ -11,16 +11,16 @@ install:
 
 
 kiosk:
-	sudo cp service/imvi.service /etc/systemd/system/$(SRVC_NAME).service
-	systemctl enable --now $(SRVC_NAME).service
+	@sudo cp service/imvi.service /etc/systemd/system/$(SRVC_NAME).service
+	sudo systemctl enable --now $(SRVC_NAME).service
 
 
 nokiosk:
-	systemctl disable --now $(SRVC_NAME).service
+	sudo systemctl disable --now $(SRVC_NAME).service
 
 
 uninstall: nokiosk
-	sudo rm /etc/systemd/system/$(SRVC_NAME).service
-	rm -f ~/.imvi.json
-	rm -rf ~/imvi
+	@sudo rm /etc/systemd/system/$(SRVC_NAME).service
+	@rm -f ~/.imvi.json
+	@rm -rf ~/imvi
 
