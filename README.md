@@ -9,7 +9,6 @@ This project is an attempt to turn an old screen and a Raspberry Pi into a stand
 * The following projects and the capability to build them:
    * https://github.com/godspeed1989/fbv
    * https://github.com/ferk/udev-media-automount
-* poppler-utils
 * python3
 
 
@@ -28,7 +27,7 @@ That's what  [```udev```](https://github.com/ferk/udev-media-automount) does. Bu
 
 3. A way to run the python project immediately on start-up
 
-We'll install a service for that: ```make kiosk```. If at any time you want to stop this from autostarting, just go: ```make nokiosk```.
+*** TODO ***
 
 
 ## The Project
@@ -57,5 +56,5 @@ In the "pins" key, you need to define the GPIOs connected to the two buttons "mo
 
 ### Python Code
 
-```make install ``` will create an environment ```~/imvi``` and install the imvi package there.
+```make install ``` will create an environment ```~/imvi``` and install the imvi package there. It will also create a shortcut script ```imvi``` to launch the viewer program.
 
