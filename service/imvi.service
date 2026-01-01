@@ -10,4 +10,6 @@ User={USER}
 WorkingDirectory=/home/{USER}
 Type=simple
 Restart=on-failure
+StandardInput=tty
+StandardOutput=tty
 ExecStart=/home/{USER}/imvi/bin/python3 -m imvi
