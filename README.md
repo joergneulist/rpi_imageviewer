@@ -56,5 +56,11 @@ In the "pins" key, you need to define the GPIOs connected to the two buttons "mo
 
 ### Python Code
 
-```make install ``` will create an environment ```~/imvi``` and install the imvi package there. It will also create a shortcut script ```imvi``` to launch the viewer program.
+```make install ``` will create an environment ```~/imvi``` and install the imvi package there. To launch it manually, execute ```~/imvi/bin/python3 -m imvi```.
 
+```make kiosk``` will override ```getty@tty1.service``` to launch the viewer on boot.
+
+
+### Optimisations
+
+To simplify the system, you can disable some boot services and make the system read-only. I will document this later.
