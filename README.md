@@ -53,6 +53,7 @@ In the "pins" key, you need to define the GPIOs connected to the two buttons "mo
 }
 ```
 
+Also, take a look at the file ```service/override.conf``` - it hardcodes a user path. Adapt it to the user you are using.
 
 ### Python Code
 
