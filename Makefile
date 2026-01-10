@@ -5,24 +5,23 @@ SRVC_NAME = imvi-kiosk
 
 
 install:
-	@install -m444 etc/config.json ~/.imvi.json
-	@python3 -m venv ~/imvi --clear --symlinks --system-site-packages
-	@~/imvi/bin/pip3 install .
+	install -m444 etc/config.json ~/.imvi.json
+	python3 -m venv ~/imvi --clear --symlinks --system-site-packages
+	~/imvi/bin/pip3 install .
 	install -m755 bin/imvi ~/.local/bin/imvi
 
 
 kiosk:
-	@sudo cp service/imvi.service /etc/systemd/system/$(SRVC_NAME).service
-	sudo systemctl enable --now $(SRVC_NAME).service
+	sudo mkdir -p /etc/systemd/system/getty@getty1.service.d
+	sudo cp service/override.conf /etc/systemd/system/getty@getty1.service.d/
 
 
 nokiosk:
-	sudo systemctl disable --now $(SRVC_NAME).service
+	sudo rm -rf /etc/systemd/system/getty@getty1.service.d
 
 
 uninstall: nokiosk
-	@sudo rm /etc/systemd/system/$(SRVC_NAME).service
-	@rm -f ~/.imvi.json
-	@rm -rf ~/imvi
-	@rm -f ~/.local/bin/imvi
-
+	sudo rm /etc/systemd/system/$(SRVC_NAME).service
+	rm -f ~/.imvi.json
+	rm -rf ~/imvi
+	rm -f ~/.local/bin/imvi
