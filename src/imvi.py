@@ -4,14 +4,13 @@
 from collections import deque
 import json
 from pathlib import Path
+from sys import argv
 from time import sleep
 
 from statemachine import StateMachine
 
 
 MEDIA_PATH = Path('/media')
-CONFIG_PATH = Path('~/.imvi.json').expanduser()
-
 
 CFG_KEY_PINS = 'pins'
 CFG_KEY_TYPES = 'types'
@@ -41,7 +40,7 @@ def gather_files(path):
 
 
 if __name__ == '__main__':
-    config = read_config(CONFIG_PATH)
+    config = read_config(Path(argv[1]))
     print('config:', config)
     
     # set up central state machine

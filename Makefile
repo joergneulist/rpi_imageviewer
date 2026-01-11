@@ -1,21 +1,24 @@
 .PHONY: install kiosk nokiosk uninstall
 
+TARGET=/opt/imvi
+SRVC="getty@tty1.service"
+
 
 install:
-	install -m444 etc/config.json ~/.imvi.json
-	python3 -m venv ~/imvi --clear --symlinks --system-site-packages
-	~/imvi/bin/pip3 install .
+	sudo install -m 777 -d $(TARGET)
+	python3 -m venv $(TARGET) --clear --symlinks --system-site-packages
+	install -m444 etc/imvi.json $(TARGET)
+	$(TARGET)/bin/pip3 install .
 
 
 kiosk:
-	sudo mkdir -p /etc/systemd/system/getty@getty1.service.d
-	sudo cp service/override.conf /etc/systemd/system/getty@getty1.service.d/
+	echo "[Service]\nType=exec\nExecStart=\nExecStart=$(TARGET)/bin/python3 -m imvi $(TARGET)/imvi.json" | sudo systemctl edit $(SRVC) --stdin
 
 
 nokiosk:
-	sudo rm -rf /etc/systemd/system/getty@getty1.service.d
+	sudo systemctl revert $(SRVC)
 
 
 uninstall: nokiosk
-	rm -f ~/.imvi.json
-	rm -rf ~/imvi
+	sudo rm -f $(TARGET)
+
