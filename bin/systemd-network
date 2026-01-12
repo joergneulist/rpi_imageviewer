@@ -1,0 +1,5 @@
+#!/bin/bash
+for srvc in $(cat ../etc/network_services)
+do
+  systemctl $1 "$srvc".service
+done

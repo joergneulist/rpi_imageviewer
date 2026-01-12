@@ -1,0 +1,3 @@
+#!/bin/bash
+bin/systemd-network enable
+bin/systemd-network start
