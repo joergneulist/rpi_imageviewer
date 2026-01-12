@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image, ImageOps
+from sys import argv
 
 
 def _read_config(filename):
@@ -30,3 +31,8 @@ class Framebuffer(object):
         image = ImageOps.pad(image, (self.size[0], self.size[1]), color=(0, 0, 0))
         image = image.convert('I;16')
         self.map[:] = np.array(image)
+
+
+if __name__ == '__main__':
+    fb = Framebuffer()
+    fb.show(argv[1])
