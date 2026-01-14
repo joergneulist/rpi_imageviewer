@@ -35,16 +35,9 @@ sudo apt autoremove --purge
 
 To speed up boot, there's a few services, you can safely get rid of:
 ```
-sudo systemctl disable alsa-restore.service
 sudo systemctl disable apt-daily-upgrade.timer
 sudo systemctl disable apt-daily.timer
-sudo systemctl disable cloud-config.service
-sudo systemctl disable cloud-final.service
-sudo systemctl disable cloud-init-local.service
-sudo systemctl disable cloud-init-network.service
-sudo systemctl disable cloud-init.service
 sudo systemctl disable cron.service
-sudo systemctl disable printing.service
 ```
 
 You can also edit ```/boot/firmware/config.txt```, comment out camera and sound and add ```dtoverlay=disable-bt``` to turn off bluetooth.
@@ -53,7 +46,7 @@ You can also edit ```/boot/firmware/config.txt```, comment out camera and sound 
 ## Installing the python application
 
 ```
-sudo apt install git python3-setuptools
+sudo apt install git python3-numpy python3-pil python3-setuptools
 git clone https://github.com/joergneulist/rpi_imageviewer.git
 ```
 
