@@ -1,3 +1,5 @@
 #!/bin/bash
-bin/systemd-network enable
-bin/systemd-network start
+BASE=$(readlink -f $(dirname $0))
+LIST=$(readlink -f $BASE/../etc/network_services)
+$BASE/systemd-network enable $LIST
+$BASE/systemd-network start $LIST

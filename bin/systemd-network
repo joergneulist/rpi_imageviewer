@@ -1,5 +1,6 @@
 #!/bin/bash
-for srvc in $(cat ../etc/network_services)
+for srvc in $(cat $2)
 do
-  systemctl $1 "$srvc".service
+  echo $1 $srvc
+  sudo systemctl $1 "$srvc".service
 done
