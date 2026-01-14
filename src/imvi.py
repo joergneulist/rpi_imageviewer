@@ -7,13 +7,13 @@ from pathlib import Path
 from sys import argv
 from time import sleep
 
+from framebuffer import Framebuffer
 from statemachine import StateMachine
 
 
 MEDIA_PATH = Path('/media')
 
 CFG_KEY_PINS = 'pins'
-CFG_KEY_TYPES = 'types'
 
 
 def read_config(path):
@@ -22,7 +22,6 @@ def read_config(path):
         cfg = json.load(f)
     
     assert CFG_KEY_PINS in cfg
-    assert CFG_KEY_TYPES in cfg
     return cfg
 
 
@@ -44,7 +43,7 @@ if __name__ == '__main__':
     print('config:', config)
     
     # set up central state machine
-    main = StateMachine(config)
+    main = StateMachine(config, Framebuffer())
     
     # This main loop controls watching for file changes. The actual logic is
     # implemented in the State Machine, triggered by the button callbacks.

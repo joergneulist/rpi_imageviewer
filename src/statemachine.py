@@ -10,8 +10,8 @@ from input import ButtonHandler
 from media import FileList
 
 
-BTN_STEP = 'step'
-BTN_MODE = 'mode'
+BTN_NEXT = 'next'
+BTN_PREV = 'prev'
 
 
 class StateMachine:
@@ -23,15 +23,16 @@ class StateMachine:
     VIEW = 'view'
     INFO = 'info'
     
-    def __init__(self, config):
+    def __init__(self, config, framebuffer):
         self.config = config
-        self.files = FileList(config['types'], self.cb_media_update)
+        self.framebuffer = framebuffer
+        self.files = FileList(self.cb_media_update)
         self.state = StateMachine.IDLE
         self.task = None
 
         # register triggers for media control
         self.btn_handlers = {}
-        for button in [BTN_MODE, BTN_STEP]:
+        for button in [BTN_PREV, BTN_NEXT]:
             self.btn_handlers[button] = ButtonHandler(self.config['pins'][button], button, self.cb_btn_short, self.cb_btn_long)
 
 
@@ -40,23 +41,23 @@ class StateMachine:
             print('State: IDLE - no media loaded')
         elif self.state == StateMachine.VIEW:
             print(f'State: VIEW - viewing file {self.files.active + 1}/{self.files.n}: {self.files.get_file()}')
-            self.files.view()
+            self.files.view(self.framebuffer)
 
 
     def cb_btn_long(self, name, duration):
         print(f'long press: {name} pressed for {duration} seconds')
-        if name == BTN_STEP:
+        if name == BTN_NEXT:
             self.files.next()
-        elif name == BTN_MODE:
+        elif name == BTN_PREV:
             self.files.prev()
         self.update_view()
 
 
     def cb_btn_short(self, name, duration):
         print(f'short press: {name} pressed for {duration} seconds')
-        if name == BTN_STEP:
+        if name == BTN_NEXT:
             self.files.next()
-        elif name == BTN_MODE:
+        elif name == BTN_PREV:
             self.files.prev()
         self.update_view()
 
