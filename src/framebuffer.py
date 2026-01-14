@@ -29,8 +29,13 @@ class Framebuffer(object):
         if image.width < image.height:
             image = image.transpose(Image.ROTATE_270)
         image = ImageOps.pad(image, (self.size[0], self.size[1]), color=(0, 0, 0))
-        image = image.convert('I;16')
-        self.map[:] = np.array(image)
+        
+        npimg = np.array(image, dtype=np.uint16)
+        print(npimg.shape)
+        r, g, b = npimg[:, :, 0], npimg[:, :, 1], npimg[:, :, 2]
+        print(r.shape, g.shape, b.shape)
+        bgr565 = ((b >> 3) << 11) | ((g >> 2) << 5) | (r >> 3)
+        self.map[:] = bgr565.flatten()
 
 
 if __name__ == '__main__':
