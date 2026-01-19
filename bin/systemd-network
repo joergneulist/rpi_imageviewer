@@ -1,6 +1,0 @@
-#!/bin/bash
-for srvc in $(cat $2)
-do
-  echo $1 $srvc
-  sudo systemctl $1 "$srvc".service
-done

@@ -1,5 +1,0 @@
-#!/bin/bash
-BASE=$(readlink -f $(dirname $0))
-LIST=$(readlink -f $BASE/../etc/network_services)
-$BASE/systemd-network disable $LIST
-$BASE/systemd-network stop $LIST
