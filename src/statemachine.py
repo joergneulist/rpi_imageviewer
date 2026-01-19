@@ -23,14 +23,16 @@ class StateMachine:
     VIEW = 'view'
     INFO = 'info'
     
-    def __init__(self, config, framebuffer):
+    def __init__(self, config, media_hdlr, framebuffer):
         self.config = config
         self.framebuffer = framebuffer
-        self.files = FileList(self.cb_media_update)
+        self.files = media_hdlr
+        self.files.register_media_callback(self.cb_media_update)
         self.state = StateMachine.IDLE
         self.task = None
 
         # register triggers for media control
+        ButtonHandler.setup()
         self.btn_handlers = {}
         for button in [BTN_PREV, BTN_NEXT]:
             self.btn_handlers[button] = ButtonHandler(self.config['pins'][button], button, self.cb_btn_short, self.cb_btn_long)
@@ -62,12 +64,9 @@ class StateMachine:
         self.update_view()
 
 
-    def cb_media_update(self, count, persistent):
-        print(f'media updated: {count} files, persistent={persistent}')
-        # Switch state appropriately - unless the currently viewed file is still present:
-        if count == 0:
-            self.state = StateMachine.IDLE
+    def cb_media_update(self, viewing_possible):
+        if viewing_possible:
+            self.state = StateMachine.VIEW
         else:
-            if self.state == StateMachine.IDLE or not persistent:
-                self.state = StateMachine.VIEW
+            self.state = StateMachine.IDLE
         self.update_view()

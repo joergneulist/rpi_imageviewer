@@ -4,14 +4,14 @@
 from collections import deque
 import json
 from pathlib import Path
-from sys import argv
+from sys import argv, path
 from time import sleep
 
 from framebuffer import Framebuffer
+from media import FileList
 from statemachine import StateMachine
+from usbmedia import USBMediaKeeper
 
-
-MEDIA_PATH = Path('/media')
 
 CFG_KEY_PINS = 'pins'
 
@@ -24,35 +24,36 @@ def read_config(path):
     assert CFG_KEY_PINS in cfg
     return cfg
 
+class Main():
+    def __init__(self, config):
+        self.framebuffer = Framebuffer.assign()
+        self.files = FileList()
+        self.states = StateMachine(config, self.files, self.framebuffer)
+        self.watcher = USBMediaKeeper(self.dev_mounted, self.dev_unmounted)
+    
+    def dev_mounted(self, path):
+        directories = deque([path])
+        files = []
+        while len(directories):
+            dir = directories.popleft()
+            for node in dir.iterdir():
+                if node.is_dir():
+                    directories.append(node)
+                else:
+                    files.append(node)
+        self.files.load(path, files)
 
-def gather_files(path):
-    directories = deque([path])
-    files = []
-    while len(directories):
-        dir = directories.popleft()
-        for node in dir.iterdir():
-            if node.is_dir():
-                directories.append(node)
-            else:
-                files.append(node)
-    return files
+    def dev_unmounted(self, path):
+        self.files.unload(path)
 
 
 if __name__ == '__main__':
     config = read_config(Path(argv[1]))
     print('config:', config)
     
-    # set up central state machine
-    main = StateMachine(config, Framebuffer.assign())
-    
-    # This main loop controls watching for file changes. The actual logic is
-    # implemented in the State Machine, triggered by the button callbacks.
-    filehash = 0
+    # set up central object
+    main = Main(config)
+
+    # This main loop does nothing. All the work is triggered by callbacks on buttons and udev events.
     while True:
         sleep(5)
-        files = list(main.files.clean_filelist(gather_files(MEDIA_PATH)))
-        new_filehash = hash(frozenset(files))
-        if new_filehash != filehash:
-            filehash = new_filehash
-            print(f'found {len(files)} files, state {filehash}:', files)
-            main.files.load(files)

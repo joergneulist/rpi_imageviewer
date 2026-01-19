@@ -7,46 +7,53 @@ SUPPORTED_FORMATS = {'.bmp', '.gif', '.jpeg', '.jpg', '.png', '.tif', '.tiff', '
 
 
 class FileList:
-    def __init__(self, cb_update):
-        self.cb_update = cb_update
+    def __init__(self):
+        self.cb_update = None
         self.files = []
-        self.n = 0
+        self.update()
+
+
+    def register_media_callback(self, cb_update):
+        self.cb_update = cb_update  
+
+
+    def update(self):
+        self.n = len(self.files)
         self.active = 0
+        if self.cb_update:
+            self.cb_update(self.n > 0)
 
 
     def get_file(self):
-        if self.n:
+        if len(self.files) > 0:
             return self.files[self.active]
 
 
     def next(self):
-        if self.n:
+        if len(self.files) > 0:
             self.active = (self.active + 1) % len(self.files)
 
 
     def prev(self):
-        if self.n:
+        if len(self.files) > 0:
             self.active = (self.active - 1) % len(self.files)
 
 
-    def clean_filelist(self, file_list):
+    def load(self, tag, file_list):
         for file in file_list:
             if file.is_file() and file.suffix.lower() in SUPPORTED_FORMATS:
-                yield file
+                self.files.append((tag, file))
+        self.update()
 
 
-    def load(self, file_list):
-        active_file = self.get_file()
+    def unload(self, tag):
+        new_files = []
+        for (tag, file) in self.files:
+            if tag != tag:
+                new_files.append((tag, file))
+        self.files = new_files
+        self.update()
 
-        self.files = file_list
-        self.n = len(self.files)
-        try:
-            self.active = self.files.index(active_file)
-            self.cb_update(self.n, True)
-        except:
-            self.active = 0
-            self.cb_update(self.n, False)
- 
 
     def view(self, fb):
         fb.show(self.get_file())
