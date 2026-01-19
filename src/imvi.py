@@ -43,7 +43,7 @@ if __name__ == '__main__':
     print('config:', config)
     
     # set up central state machine
-    main = StateMachine(config, Framebuffer())
+    main = StateMachine(config, Framebuffer.assign())
     
     # This main loop controls watching for file changes. The actual logic is
     # implemented in the State Machine, triggered by the button callbacks.
