@@ -19,7 +19,7 @@ class FileList:
 
     def get_file(self):
         if len(self.files) > 0:
-            return self.files[self.active]
+            return self.files[self.active][1]
 
 
     def next(self):

@@ -50,15 +50,15 @@ class Framebuffer32(Framebuffer):
     def __init__(self, dev, size):
         super().__init__(dev, size)
         self.fbfile = open(DEVICEPATH.format(self.dev), 'r+b')
-        self.map = mmap(self.fbfile.fileno(), 0, access=ACCESS_WRITE)
+        self.map = mmap(self.fbfile.fileno(), size[0]*size[1]*4, access=ACCESS_WRITE)
     
     def __del__(self):
         self.map.close()
         self.fbfile.close()
 
     def mmap(self, image):
-        r, g, b = image.split()
-        image = Image.merge('RGB', (b, g, r)).convert('RGBA')
+        r, g, b, a = image.convert('RGBA').split()
+        image = Image.merge('RGBA', (b, g, r, a))
         self.map[:] = image.tobytes()
 
 

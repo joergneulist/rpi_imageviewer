@@ -4,6 +4,9 @@ from pathlib import Path
 from pyudev import Context, Monitor, MonitorObserver
 
 
+MEDIA_PATH = Path('/tmp/imvimedia') 
+
+
 class Wrap_libc():
     def __init__(self):
         self.libc = ctypes.CDLL(ctypes.util.find_library('c'), use_errno=True)
@@ -11,13 +14,13 @@ class Wrap_libc():
         self.libc.umount.argtypes = [ctypes.c_char_p]
     
     def mount(self, source, target, fstype):
-        ret = self.libc.mount(source.encode(), target.encode(), b'vfat', 0, None)
+        ret = self.libc.mount(str(source).encode(), str(target).encode(), b'vfat', 0, None)
         if ret < 0:
             errno = ctypes.get_errno()
             print(f'mount error {source}, {target}, {fstype}: {errno}, {os.strerror(errno)}')
 
     def umount(self, target):
-        ret = self.libc.umount(target.encode())
+        ret = self.libc.umount(str(target).encode())
         if ret < 0:
             errno = ctypes.get_errno()
             print(f'umount error {target}: {errno}, {os.strerror(errno)}')
@@ -39,7 +42,7 @@ class USBMediaKeeper:
 
 
     def mount(self, uuid, dev, fs):
-        self.mounted_devices[uuid] = Path(f'/media/usb_{uuid}')
+        self.mounted_devices[uuid] = MEDIA_PATH / uuid
         self.mounted_devices[uuid].mkdir(parents=True, exist_ok=False)
         self.libc.mount(dev, self.mounted_devices[uuid], fs)
         return self.mounted_devices[uuid]

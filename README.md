@@ -26,8 +26,10 @@ Get [buildroot](https://buildroot.org/) and configure a few things:
    c. Target packages
       - Hardware handling, activate pigpio and raspi-gpio
       - Interpreter languages and scripting, activate python3
-      - Python3 External Packages, activate python-gpiozero and python-pyudev
+      - Libraries / Graphics, activate jpeg support and libpng
+      - Python3 external packages, activate python-gpiozero, python-pillow, and python-pyudev
 3. Create the subfolder ```_overlay``` and copy this project there (you only need ```imvi.json``` and the ```.py``` sources, to be exact)
 4. **TODO** Changes to make imvi start automatically
 5. Run ```make``` and take a long walk.
 6. Flash ```output/sdcard.img``` and boot your RPi from it. Done.
+

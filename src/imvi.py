@@ -10,7 +10,6 @@ from time import sleep
 from framebuffer import Framebuffer
 from input import ButtonHandler
 from media import FileList
-from src import framebuffer
 from usbmedia import USBMediaKeeper
 
 
@@ -40,9 +39,8 @@ class StateMachine:
     def __init__(self, config):
         self.config = config
         self.framebuffer = Framebuffer.assign()
-        self.fileTracker = FileList(self.cb_media_update)
+        self.fileTracker = FileList()
         self.usbWatcher = USBMediaKeeper(self.cb_dev_mounted, self.cb_dev_unmounted)
-        self.framebuffer = framebuffer
         self.task = None
 
         # register triggers for media control
@@ -58,17 +56,17 @@ class StateMachine:
 
     def cb_btn_long(self, name, duration):
         if name == BTN_NEXT:
-            self.files.next()
+            self.fileTracker.next()
         elif name == BTN_PREV:
-            self.files.prev()
+            self.fileTracker.prev()
         self.update_view()
 
 
     def cb_btn_short(self, name, duration):
         if name == BTN_NEXT:
-            self.files.next()
+            self.fileTracker.next()
         elif name == BTN_PREV:
-            self.files.prev()
+            self.fileTracker.prev()
         self.update_view()
 
     
@@ -92,7 +90,7 @@ class StateMachine:
 
 
 if __name__ == '__main__':
-    config = read_config(Path(argv[1]))
+    config = read_config(Path(argv[1] if len(argv) > 1 else 'config.json'))
     print('config:', config)
     
     # set up central object
