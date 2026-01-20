@@ -6,68 +6,28 @@ This project is an attempt to turn an old screen and a Raspberry Pi into a stand
 ## Prerequisites
 
 * An old screen, a Raspberry Pi, one or two buttons, a soldering iron
-* The following project and the capability to build it:
-   * https://github.com/ferk/udev-media-automount
-* python3
-* I've tested this with a Raspberry Pi 1B running the official Trixie Lite image.
+* Only a moderate fear of using buildroot
 
-
-You'll need :
-
-1. A USB automounter.
-
-That's what  [```udev-media-automount```](https://github.com/ferk/udev-media-automount) does. Build & install this package, and all USB media will automatically appear in ```/media```.
-   
-2. A way to run the python project immediately on start-up. We'll override ```getty@tty1.service``` to achieve that.
-
-3. A nifty little program that does the actual work. You've found it.
+The code is very much self-contained. It will handle udev-events and automount USB-Sticks, draw images to framebuffer, and handle GPIO for the user interaction.
+On the main branch, you'll see this running on the official Trixie Raspbian, but here, we're digging deeper.
 
 
 ## Setting up the system
 
-Starting with the fresh Trixie image, you should update the system and uninstall a few things we will not need:
-```
-sudo apt update
-sudo apt full-upgrade
-sudo apt remove --purge avahi-daemon bluez cloud-init modemmanager triggerhappy wolfram-engine 
-sudo apt autoremove --purge
-```
+Get [buildroot](https://buildroot.org/) and configure a few things:
 
-To speed up boot, there's a few services, you can safely get rid of:
-```
-sudo systemctl disable apt-daily-upgrade.timer
-sudo systemctl disable apt-daily.timer
-sudo systemctl disable cron.service
-```
-
-You can also edit ```/boot/firmware/config.txt```, comment out camera and sound and add ```dtoverlay=disable-bt``` to turn off bluetooth.
-
-
-## Installing the python application
-
-```
-sudo apt install git python3-numpy python3-pil python3-setuptools
-git clone https://github.com/joergneulist/rpi_imageviewer.git
-```
-
-Adapt ```etc/imvi.json``` to the GPIOs you will be using for the buttons.
-
-
-### Building
-
-```make install ``` will create an environment ```/opt/imvi``` and install the imvi package there. To launch it manually, execute ```/opt/imvi/bin/python3 -m imvi```.
-
-```make kiosk``` will override ```getty@tty1.service``` to launch the viewer on boot.
-
-And you're done.
-
-
-## Finishing touches
-
-If you don't need the network, you can turn the services off. Be sure to inspect ```etc/network-services``` before running:
-```
-bin/net-off
-```
-
-***TODO***
-Make the system read-only.
+1. ```make raspberrypi_defconfig``` or whatever matches your hardware (I'm using an RPi 1B) to set up the system defaults.
+2. ```make menuconfig``` and change the following things:
+   a. System configuration
+      - Set hostname, banner, and root password according to taste
+      - Set root filesystem overlay directories to ```_overlay```
+   b. Kernel
+      - Linux kernel tools, activate GPIO
+   c. Target packages
+      - Hardware handling, activate pigpio and raspi-gpio
+      - Interpreter languages and scripting, activate python3
+      - Python3 External Packages, activate python-gpiozero and python-pyudev
+3. Create the subfolder ```_overlay``` and copy this project there (you only need ```imvi.json``` and the ```.py``` sources, to be exact)
+4. **TODO** Changes to make imvi start automatically
+5. Run ```make``` and take a long walk.
+6. Flash ```output/sdcard.img``` and boot your RPi from it. Done.
