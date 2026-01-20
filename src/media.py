@@ -8,20 +8,13 @@ SUPPORTED_FORMATS = {'.bmp', '.gif', '.jpeg', '.jpg', '.png', '.tif', '.tiff', '
 
 class FileList:
     def __init__(self):
-        self.cb_update = None
         self.files = []
         self.update()
-
-
-    def register_media_callback(self, cb_update):
-        self.cb_update = cb_update  
 
 
     def update(self):
         self.n = len(self.files)
         self.active = 0
-        if self.cb_update:
-            self.cb_update(self.n > 0)
 
 
     def get_file(self):

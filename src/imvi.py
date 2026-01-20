@@ -8,12 +8,15 @@ from sys import argv, path
 from time import sleep
 
 from framebuffer import Framebuffer
+from input import ButtonHandler
 from media import FileList
-from statemachine import StateMachine
+from src import framebuffer
 from usbmedia import USBMediaKeeper
 
 
 CFG_KEY_PINS = 'pins'
+BTN_NEXT = 'next'
+BTN_PREV = 'prev'
 
 
 def read_config(path):
@@ -24,14 +27,52 @@ def read_config(path):
     assert CFG_KEY_PINS in cfg
     return cfg
 
-class Main():
-    def __init__(self, config):
-        self.framebuffer = Framebuffer.assign()
-        self.files = FileList()
-        self.states = StateMachine(config, self.files, self.framebuffer)
-        self.watcher = USBMediaKeeper(self.dev_mounted, self.dev_unmounted)
+
+class StateMachine:
+    '''State machine for the image viewer
     
-    def dev_mounted(self, path):
+    Full State Machine TODO. Currently, the two buttons just step through the images backwards and forwards.
+    '''
+    IDLE = 'idle'
+    VIEW = 'view'
+    INFO = 'info'
+    
+    def __init__(self, config):
+        self.config = config
+        self.framebuffer = Framebuffer.assign()
+        self.fileTracker = FileList(self.cb_media_update)
+        self.usbWatcher = USBMediaKeeper(self.cb_dev_mounted, self.cb_dev_unmounted)
+        self.framebuffer = framebuffer
+        self.task = None
+
+        # register triggers for media control
+        self.btn_handlers = {}
+        for button in [BTN_PREV, BTN_NEXT]:
+            self.btn_handlers[button] = ButtonHandler(self.config['pins'][button], button, self.cb_btn_short, self.cb_btn_long)
+
+
+    def update_view(self):
+        print(f'Viewing file {self.fileTracker.active + 1}: {self.fileTracker.get_file()}')
+        self.fileTracker.view(self.framebuffer)
+
+
+    def cb_btn_long(self, name, duration):
+        if name == BTN_NEXT:
+            self.files.next()
+        elif name == BTN_PREV:
+            self.files.prev()
+        self.update_view()
+
+
+    def cb_btn_short(self, name, duration):
+        if name == BTN_NEXT:
+            self.files.next()
+        elif name == BTN_PREV:
+            self.files.prev()
+        self.update_view()
+
+    
+    def cb_dev_mounted(self, path):
         directories = deque([path])
         files = []
         while len(directories):
@@ -41,10 +82,13 @@ class Main():
                     directories.append(node)
                 else:
                     files.append(node)
-        self.files.load(path, files)
+        self.fileTracker.load(path, files)
+        self.update_view()
 
-    def dev_unmounted(self, path):
-        self.files.unload(path)
+
+    def cb_dev_unmounted(self, path):
+        self.fileTracker.unload(path)
+        self.update_view()
 
 
 if __name__ == '__main__':
@@ -52,7 +96,7 @@ if __name__ == '__main__':
     print('config:', config)
     
     # set up central object
-    main = Main(config)
+    main = StateMachine(config)
 
     # This main loop does nothing. All the work is triggered by callbacks on buttons and udev events.
     while True:
