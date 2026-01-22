@@ -1,64 +1,115 @@
+# GENERAL SETTINGS
+# Inspect and modify these variables to suit your needs
+
+# buildroot-2025.11.1 was tested and works; if you upgrade, expect hiccups
 BUILDROOT_VERSION=buildroot-2025.11.1
-CODE_TARGET_PATH=/opt/imvi
-CONFIG_TARGET_PATH=/etc
 
-BUILDROOT_FILE=$(BUILDROOT_VERSION).tar.xz
-BUILDROOT_SOURCE=https://buildroot.org/downloads/$(BUILDROOT_FILE)
-BUILDROOT_TARGET=out/br
+# This is the base config for your target; I was using a raspberry pi 1B
+BUILDROOT_BASE_CONFIG=$(HOST_PATH_BUILDROOT)/configs/raspberrypi_defconfig
 
-PATCHES_DIR=buildroot_tailoring
+# Paths inside the target filesystem
+TARGET_PATH_PYTHON=/opt/imvi
+TARGET_PATH_CONFIG=/etc
 
-DIR_SYSTEM_OVERLAY=out/system
+# Target image configuration
+TARGET_HOSTNAME=imvi
+TARGET_GREETING=Welcome to IMVI!
+TARGET_ROOT_PASSWORD=imvi
 
-CODE = $(wildcard src/*.py)
-CODE_PATH = $(DIR_SYSTEM_OVERLAY)/$(CODE_TARGET_PATH)
-CODE_TARGETS = $(patsubst src/%,$(CODE_PATH)/%, $(CODE))
+# BUILD SETTINGS
+# This affects the internal behaviour; you shouldn't need to modify these
 
-CONFIG = $(wildcard etc/*)
-CONFIG_PATH = $(DIR_SYSTEM_OVERLAY)/$(CONFIG_TARGET_PATH)
-CONFIG_TARGETS = $(patsubst etc/%,$(CONFIG_PATH)/%, $(CONFIG))
+BUILDROOT_FINAL_CONFIG_NAME=raspberrypi_imvi_defconfig
+HOST_PATH_BUILD=out
+HOST_PATH_CACHE=cache
+HOST_PATH_BUILDROOT=$(HOST_PATH_BUILD)/br
+HOST_PATH_SYSTEM_OVERLAY=$(HOST_PATH_BUILD)/system
 
-.NOTINTERMEDIATE: cache/$(BUILDROOT_FILE)
+HOST_CONFIG_PATCH=$(HOST_PATH_BUILD)/br_config_patch
 
-.PHONY: all buildroot system_overlay clean
+BUILDROOT_FINAL_CONFIG_FILE=$(HOST_PATH_BUILDROOT)/configs/$(BUILDROOT_FINAL_CONFIG_NAME)
 
-all: buildroot system_overlay clean clean_cache clean_out
 
-buildroot: $(BUILDROOT_TARGET)
+# MAKEFILE INTERNALS & SOURCES
+# Better not touch
 
-system_overlay: $(CODE_TARGETS) $(CONFIG_TARGETS)
+SOURCE_PYTHON = $(wildcard src/*.py)
+SOURCE_CONFIG = $(wildcard etc/*)
+SOURCE_BUILDROOT = buildroot_tailoring
+SOURCE_BR_CONFIG_PATCH = $(SOURCE_BUILDROOT)/configs/config_patch
+SOURCE_BR_BOARD = $(SOURCE_BUILDROOT)/board
+TARGET_OVERLAY_PYTHON=$(patsubst src/%,$(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_PYTHON)/%, $(SOURCE_PYTHON))
+TARGET_OVERLAY_CONFIG=$(patsubst etc/%,$(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_CONFIG)/%, $(SOURCE_CONFIG))
 
-clean: clean_cache clean_out
+###############################################################################
+
+### HIGH LEVEL TARGETS
+
+.PHONY: all buildroot system_overlay compile clean clean_all clean_cache
+
+all: compile
+
+buildroot: $(BUILDROOT_FINAL_CONFIG_FILE)
+
+system_overlay: $(TARGET_OVERLAY_PYTHON) $(TARGET_OVERLAY_CONFIG)
+
+compile: $(BUILDROOT_FINAL_CONFIG_FILE) system_overlay
+	@echo "Starting Buildroot compilation..."
+	$(MAKE) -C $(HOST_PATH_BUILDROOT) $(BUILDROOT_FINAL_CONFIG_NAME)
+	$(MAKE) -C $(HOST_PATH_BUILDROOT)	
+
+clean:
+	rm -rf $(HOST_PATH_BUILD)
 
 clean_cache:
-	rm -rf cache
+	rm -rf $(HOST_PATH_CACHE)
 
-clean_out:
-	rm -rf out
+clean_all: clean clean_cache
 
 
 ### LOAD AND UNZIP BUILDROOT
 
-cache/$(BUILDROOT_FILE):
+BUILDROOT_FILE=$(BUILDROOT_VERSION).tar.xz
+BUILDROOT_SOURCE=https://buildroot.org/downloads/$(BUILDROOT_FILE)
+BUILDROOT_CACHE=$(HOST_PATH_CACHE)/$(BUILDROOT_FILE)
+
+.NOTINTERMEDIATE: $(BUILDROOT_CACHE)
+
+$(BUILDROOT_CACHE):
 	mkdir -p $@$(dir $@)
 	wget -O $@ $(BUILDROOT_SOURCE)
 
-$(BUILDROOT_TARGET): cache/$(BUILDROOT_FILE)
+$(HOST_PATH_BUILDROOT): $(BUILDROOT_CACHE)
 	mkdir -p $(dir $@)
 	tar xf $<
 	mv $(BUILDROOT_VERSION) $@
 
+$(BUILDROOT_BASE_CONFIG): $(HOST_PATH_BUILDROOT)
+
 
 ### BUILDROOT CONFIGURATION
 
+SED_RULE_1 = 's,++BOARD-PATH++,$(shell readlink -f $(SOURCE_BR_BOARD)),g'
+SED_RULE_2 = 's,++SYSTEM-PATH++,$(shell readlink -f $(HOST_PATH_SYSTEM_OVERLAY)),g'
+SED_RULE_3 = 's,++HOSTNAME++,$(TARGET_HOSTNAME),g'
+SED_RULE_4 = 's,++GREETING++,$(TARGET_GREETING),g'
+SED_RULE_5 = 's,++ROOT-PASSWORD++,$(TARGET_ROOT_PASSWORD),g'
+
+$(HOST_CONFIG_PATCH): $(SOURCE_BR_CONFIG_PATCH)
+	mkdir -p $(dir $@)
+	sed -e $(SED_RULE_1) -e $(SED_RULE_2) -e $(SED_RULE_3) -e $(SED_RULE_4) -e $(SED_RULE_5) $< >$@
+
+AWK_RULE = '{a[$$1]=$$0} END{for(x in a)print a[x]}'
+$(BUILDROOT_FINAL_CONFIG_FILE): $(BUILDROOT_BASE_CONFIG) $(HOST_CONFIG_PATCH)
+	awk -F= $(AWK_RULE) $^>$@
 
 
 ### CREATE SYSTEM OVERLAY
 
-$(CODE_TARGETS): $(CODE_PATH)/%: src/%
+$(TARGET_OVERLAY_PYTHON): $(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_PYTHON)/%: src/%
 	mkdir -p $(dir $@)
 	cp $< $@
 
-$(CONFIG_TARGETS): $(CONFIG_PATH)/%: etc/%
+$(TARGET_OVERLAY_CONFIG): $(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_CONFIG)/%: etc/%
 	mkdir -p $(dir $@)
 	cp $< $@
