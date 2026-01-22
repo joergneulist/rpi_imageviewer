@@ -17,13 +17,11 @@ class Wrap_libc():
         ret = self.libc.mount(str(source).encode(), str(target).encode(), b'vfat', 0, None)
         if ret < 0:
             errno = ctypes.get_errno()
-            print(f'mount error {source}, {target}, {fstype}: {errno}, {os.strerror(errno)}')
 
     def umount(self, target):
         ret = self.libc.umount(str(target).encode())
         if ret < 0:
             errno = ctypes.get_errno()
-            print(f'umount error {target}: {errno}, {os.strerror(errno)}')
 
 
 class USBMediaKeeper:
@@ -34,11 +32,19 @@ class USBMediaKeeper:
 
         self.libc = Wrap_libc()
         
-        self.monitor = Monitor.from_netlink(Context())
+        context = Context()
+        # install observer
+        self.monitor = Monitor.from_netlink(context)
         self.monitor.filter_by('block')
         self.observer = MonitorObserver(self.monitor, self.udev_event)
         self.observer.start()
         
+        # find already existing devices
+        for device in context.list_devices(subsystem='block', DEVTYPE='partition'):
+            self.udev_event('add', device)
+    
+    def __str__(self):
+        return f'{str(type(self))}: currently mounted: ' +  ', '.join([f'{uuid}@{path}' for uuid, path in self.mounted_devices.items()])
 
 
     def mount(self, uuid, dev, fs):
@@ -50,7 +56,6 @@ class USBMediaKeeper:
 
     def umount(self, uuid):
         if not uuid in self.mounted_devices:
-            print(f'UUID {uuid} not found in mounted devices')
             return
         
         self.libc.umount(self.mounted_devices[uuid])
@@ -66,20 +71,15 @@ class USBMediaKeeper:
             fs = device.get('ID_FS_VERSION') #TODO Translate fstype - right now we get FAT32, but need vfat for mount
             uuid = device.get('ID_PART_ENTRY_UUID')
             if action == 'add':
-                print(f'USB device added: {dev} fs={fs} uuid={uuid}')
                 path = self.mount(uuid, dev, fs)
                 if self.callback_mount and path:
                     self.callback_mount(path)
             elif action == 'remove':
-                print(f'USB device removed: {dev} fs={fs} uuid={uuid}')
                 path = self.umount(uuid)
                 if self.callback_umount and path:
                     self.callback_umount(path)
-            else:
-                print(f'USB device event {action}: {dev} fs={fs} uuid={uuid}')
 
 
 if __name__ == '__main__':
     watcher = USBMediaKeeper()
     input('WAITING FOR EVENTS...')
-    print('STOPPED')

@@ -22,12 +22,15 @@ class Framebuffer(object):
     def assign(fbno=0):
         dev = f'fb{fbno}'
         config_dir = CONFIGPATH.format(dev)
-        size = tuple(_read_config(config_dir + 'virtual_size'))
-        depth = _read_config(config_dir + 'bits_per_pixel')[0]
-        if depth == 32:
-            return Framebuffer32(dev, size)
-        else:
-            raise ValueError(f'Unsupported framebuffer depth: {depth}')
+        try:
+            size = tuple(_read_config(config_dir + 'virtual_size'))
+            depth = _read_config(config_dir + 'bits_per_pixel')[0]
+            if depth == 32:
+                return Framebuffer32(dev, size)
+            else:
+                raise ValueError(f'Unsupported framebuffer depth: {depth}')
+        except:
+            return FramebufferNull(dev, (800, 600))
 
 
     def __init__(self, dev, size):
@@ -36,7 +39,7 @@ class Framebuffer(object):
         self.map = None
     
     def __str__(self):
-        return f'<{type(self)} {self.dev} size={self.size}>'
+        return f'<{str(type(self))}: {self.dev} size={self.size}>'
 
     def show(self, file_path):
         image = Image.open(file_path)
@@ -60,6 +63,15 @@ class Framebuffer32(Framebuffer):
         r, g, b, a = image.convert('RGBA').split()
         image = Image.merge('RGBA', (b, g, r, a))
         self.map[:] = image.tobytes()
+
+
+class FramebufferNull(Framebuffer):
+    def __init__(self, dev, size):
+        super().__init__(dev, size)
+    
+    def mmap(self, image):
+        print(image.filename, image.format, image.mode, image.size)
+        print(image.info)
 
 
 if __name__ == '__main__':

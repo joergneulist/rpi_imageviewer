@@ -20,6 +20,9 @@ class ButtonHandler:
         self.btn.when_pressed = self._pressed
         self.btn.when_released = self._released
 
+    def __str__(self):
+        return f'{str(type(self))}: {self.name} (GPIO {self.btn.pin})'
+
     def _held(self):
         if self.time_pressed is not None:
             self.cb_long(self.name, time() - self.time_pressed)
