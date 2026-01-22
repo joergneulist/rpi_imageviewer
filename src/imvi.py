@@ -1,5 +1,11 @@
 #!/usr/bin/python
 
+# ADD DEBUG MODE / OTHERWISE REMOVE OUTPUT
+# ADD TESTS
+# REFACTOR
+# ADD INITIAL USB DEVICE SEARCH
+# EVALUATE CACHE STRATEGIES
+# ADD OVERVIEW MODE
 
 from collections import deque
 import json
@@ -90,7 +96,7 @@ class StateMachine:
 
 
 if __name__ == '__main__':
-    config = read_config(Path(argv[1] if len(argv) > 1 else 'config.json'))
+    config = read_config(Path(argv[1] if len(argv) > 1 else '/etc/imvi.json'))
     print('config:', config)
     
     # set up central object
