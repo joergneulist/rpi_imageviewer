@@ -1,5 +1,4 @@
 import ctypes
-import os
 from pathlib import Path
 from pyudev import Context, Monitor, MonitorObserver
 

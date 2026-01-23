@@ -1,5 +1,4 @@
 from collections import deque
-from pathlib import Path
 
 
 # Alphabetically ordered list of supported file suffixes
@@ -32,18 +31,18 @@ class FileList:
             self.active = (self.active - 1) % len(self.files)
 
 
-    def load(self, tag, file_list):
-        for file in file_list:
-            if file.is_file() and file.suffix.lower() in SUPPORTED_FORMATS:
-                self.files.append((tag, file))
+    def load(self, path):
+        directories = deque([path])
+        files = []
+        while len(directories):
+            for node in directories.popleft().iterdir():
+                if node.is_dir():
+                    directories.append(node)
+                elif node.is_file() and node.suffix.lower() in SUPPORTED_FORMATS:
+                    self.files.append((path, node))
         self.update()
 
 
-    def unload(self, tag):
-        self.files = [entry for entry in self.files if entry[0] != tag]
+    def unload(self, path):
+        self.files = [entry for entry in self.files if entry[0] != path]
         self.update()
-
-
-    def view(self, fb):
-        if filename := self.get_file():
-            fb.show(filename)

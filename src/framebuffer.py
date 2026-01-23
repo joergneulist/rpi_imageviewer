@@ -51,18 +51,22 @@ class Framebuffer(object):
     def __init__(self, dev, size):
         self.dev = dev
         self.size = size
+        self.buffers = [None]
         self.map = None
     
     def __str__(self):
         return f'<{str(type(self))}: {self.dev} size={self.size}>'
 
-    def show(self, file_path):
+    def prepare(self, file_path):
         image = Image.open(file_path)
         if image.width < image.height:
             image = image.transpose(Image.ROTATE_270)
         image = ImageOps.pad(image, (self.size[0], self.size[1]), color=(0, 0, 0))
         image.filename = file_path
-        self.mmap(image)
+        
+        # TODO implement ROUND-ROBIN cache somehow
+        self.buffers[0] = self.encode(image)
+        return 0
 
 
 class Framebuffer32(Framebuffer):
@@ -75,22 +79,28 @@ class Framebuffer32(Framebuffer):
         self.map.close()
         self.fbfile.close()
 
-    def mmap(self, image):
+    def encode(self, image):
         r, g, b, a = image.convert('RGBA').split()
-        image = Image.merge('RGBA', (b, g, r, a))
-        self.map[:] = image.tobytes()
+        return Image.merge('RGBA', (b, g, r, a)).tobytes()
+
+    def show(self, buffer_idx):
+        self.map[:] = self.buffer[buffer_idx]
 
 
 class FramebufferNull(Framebuffer):
     def __init__(self, dev, size):
         super().__init__(dev, size)
     
-    def mmap(self, image):
+    def encode(self, image):
         print(image.filename, image.format, image.mode, image.size)
         print(image.info)
         r, g, b, a = image.convert('RGBA').split()
         image = Image.merge('RGBA', (b, g, r, a))
         print(f'Size: {get_size(len(image.tobytes()))}')
+        return 0
+
+    def show(self, buffer_idx):
+        print(f'Displaying buffer {buffer_idx}')
 
 if __name__ == '__main__':
     fb = Framebuffer.assign()
