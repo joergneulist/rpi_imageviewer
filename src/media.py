@@ -40,13 +40,10 @@ class FileList:
 
 
     def unload(self, tag):
-        new_files = []
-        for (tag, file) in self.files:
-            if tag != tag:
-                new_files.append((tag, file))
-        self.files = new_files
+        self.files = [entry for entry in self.files if entry[0] != tag]
         self.update()
 
 
     def view(self, fb):
-        fb.show(self.get_file())
+        if filename := self.get_file():
+            fb.show(filename)

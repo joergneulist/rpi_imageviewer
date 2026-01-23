@@ -55,7 +55,7 @@ class USBMediaKeeper:
 
 
     def umount(self, uuid):
-        if not uuid in self.mounted_devices:
+        if uuid not in self.mounted_devices:
             return
         
         self.libc.umount(self.mounted_devices[uuid])

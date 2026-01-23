@@ -10,7 +10,7 @@ from pathlib import Path
 from sys import argv, path
 from time import sleep
 
-from framebuffer import Framebuffer
+from framebuffer import Framebuffer, get_size
 from media import FileList
 from usbmedia import USBMediaKeeper
 
@@ -23,8 +23,12 @@ MY_NAME = 'IMVI - Python Image Viewer for Embedded Systems'
 def parse_args():
     parser = argparse.ArgumentParser(description=MY_NAME)
     parser.add_argument('-c', '--config', help='Override path to config file', default='/etc/imvi.json')
+    parser.add_argument('-d', '--debug', action='store_true', help='Activate debug mode: implies -v, suppresses actual framebuffer output')
+    parser.add_argument('-p', '--path', action='append', help='Add a file path to display; can be named multiple times', default=[])
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
-    return parser.parse_args()
+    args = parser.parse_args()
+    args.verbose = args.debug or args.verbose
+    return args
 
 
 def read_config(path):
@@ -41,11 +45,11 @@ class StateMachine:
     
     Full State Machine TODO. Currently, the two buttons just step through the images backwards and forwards.
     '''
-    def __init__(self, config, verbose=False):
+    def __init__(self, config, framebuffer, verbose=False):
         self.config = config
         self.verbose = verbose
         self.fileTracker = FileList()
-        self.framebuffer = Framebuffer.assign()
+        self.framebuffer = framebuffer
         if self.verbose: print(self.framebuffer)
         self.usbWatcher = USBMediaKeeper(self.cb_dev_mounted, self.cb_dev_unmounted)
         if self.verbose: print(self.usbWatcher)
@@ -57,7 +61,7 @@ class StateMachine:
             for button in [BTN_PREV, BTN_NEXT]:
                 self.btn_handlers[button] = ButtonHandler(self.config['pins'][button], button, self.cb_btn_short, self.cb_btn_long)
                 if self.verbose: print(self.btn_handlers[button])
-        except:
+        except Exception:
             self.btn_handlers = None
             if self.verbose: print('GPIO-Handlers failed!')
 
@@ -67,7 +71,7 @@ class StateMachine:
         self.fileTracker.view(self.framebuffer)
 
 
-    def cb_btn_long(self, name, duration):
+    def cb_btn_long(self, name):
         if self.verbose: print(f'long press {name}')
         if name == BTN_NEXT:
             self.fileTracker.next()
@@ -76,7 +80,7 @@ class StateMachine:
         self.update_view()
 
 
-    def cb_btn_short(self, name, duration):
+    def cb_btn_short(self, name):
         if self.verbose: print(f'short press {name}')
         if name == BTN_NEXT:
             self.fileTracker.next()
@@ -84,14 +88,14 @@ class StateMachine:
             self.fileTracker.prev()
         self.update_view()
 
-    
+
     def cb_dev_mounted(self, path):
         if self.verbose: print(f'usb device mounted on {path}')
         directories = deque([path])
         files = []
         while len(directories):
-            dir = directories.popleft()
-            for node in dir.iterdir():
+            curdir = directories.popleft()
+            for node in curdir.iterdir():
                 if node.is_dir():
                     directories.append(node)
                 else:
@@ -114,8 +118,20 @@ if __name__ == '__main__':
     print(config)
     
     # set up central object
-    main = StateMachine(config, args.verbose)
+    main = StateMachine(config, Framebuffer.assign(0, args.debug), args.verbose)
+    for path in args.path:
+        main.cb_dev_mounted(Path(path))
 
     # This main loop does nothing. All the work is triggered by callbacks on buttons and udev events inside the state machine.
     while True:
-        sleep(5)
+        if main.verbose:
+            with open('/proc/meminfo', 'r') as memory:
+                use = {'MemTotal:': 'total', 'MemAvailable:': 'free'}
+                for line in memory:
+                    tokens = line.split()
+                    if tokens[0] in use:
+                        print(f'{use[tokens[0]]}: {get_size(int(tokens[1])*1024)}')
+
+        # simulate gpio buttons for testing purposes
+        input()
+        main.cb_btn_short(BTN_NEXT)

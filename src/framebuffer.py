@@ -1,4 +1,5 @@
 from mmap import mmap, ACCESS_WRITE
+from pathlib import Path
 from PIL import Image, ImageOps
 from sys import argv
 
@@ -11,6 +12,14 @@ def _read_config(filename):
         return [int(t) for t in content.strip().split(',') if t]
 
 
+def get_size(size):
+    factor = 1024
+    for unit in ["", "K", "M", "G", "T", "P"]:
+        if size < factor:
+            return f"{size:.2f} {unit}B"
+        size /= factor
+
+
 class Framebuffer(object):
     # Raspbian Pi 1B has this framebuffer mode:
     # geometry 1920 1200 1920 1200 16
@@ -19,18 +28,24 @@ class Framebuffer(object):
     # geometry 1920 1200 1920 1200 32
     # rgba 8/16,8/8,8/0,0/24
     @staticmethod
-    def assign(fbno=0):
+    def assign(fbno=0, debug=False):
         dev = f'fb{fbno}'
-        config_dir = CONFIGPATH.format(dev)
-        try:
-            size = tuple(_read_config(config_dir + 'virtual_size'))
-            depth = _read_config(config_dir + 'bits_per_pixel')[0]
-            if depth == 32:
-                return Framebuffer32(dev, size)
-            else:
-                raise ValueError(f'Unsupported framebuffer depth: {depth}')
-        except:
-            return FramebufferNull(dev, (800, 600))
+        config_dir = Path(CONFIGPATH.format(dev))
+        size = (1024, 768)
+        depth = 0
+        if not debug:
+            try:
+                size = tuple(_read_config(config_dir / 'virtual_size'))
+                depth = _read_config(config_dir / 'bits_per_pixel')[0]
+            except Exception:
+                pass
+
+        if depth == 0:
+            return FramebufferNull(dev, size)
+        elif depth == 32:
+            return Framebuffer32(dev, size)
+        else:
+            raise ValueError(f'Unsupported framebuffer depth: {depth}')
 
 
     def __init__(self, dev, size):
@@ -46,13 +61,14 @@ class Framebuffer(object):
         if image.width < image.height:
             image = image.transpose(Image.ROTATE_270)
         image = ImageOps.pad(image, (self.size[0], self.size[1]), color=(0, 0, 0))
+        image.filename = file_path
         self.mmap(image)
 
 
 class Framebuffer32(Framebuffer):
     def __init__(self, dev, size):
         super().__init__(dev, size)
-        self.fbfile = open(DEVICEPATH.format(self.dev), 'r+b')
+        self.fbfile = open(Path(DEVICEPATH.format(self.dev)), 'r+b')
         self.map = mmap(self.fbfile.fileno(), size[0]*size[1]*4, access=ACCESS_WRITE)
     
     def __del__(self):
@@ -72,7 +88,9 @@ class FramebufferNull(Framebuffer):
     def mmap(self, image):
         print(image.filename, image.format, image.mode, image.size)
         print(image.info)
-
+        r, g, b, a = image.convert('RGBA').split()
+        image = Image.merge('RGBA', (b, g, r, a))
+        print(f'Size: {get_size(len(image.tobytes()))}')
 
 if __name__ == '__main__':
     fb = Framebuffer.assign()

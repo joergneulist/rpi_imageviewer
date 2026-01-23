@@ -25,7 +25,7 @@ class ButtonHandler:
 
     def _held(self):
         if self.time_pressed is not None:
-            self.cb_long(self.name, time() - self.time_pressed)
+            self.cb_long(self.name)
             self.time_pressed = None
 
     def _pressed(self):
@@ -33,5 +33,5 @@ class ButtonHandler:
 
     def _released(self):
         if self.time_pressed is not None:
-            self.cb_short(self.name, time() - self.time_pressed)
+            self.cb_short(self.name)
             self.time_pressed = None
