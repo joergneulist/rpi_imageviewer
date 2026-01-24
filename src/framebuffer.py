@@ -84,7 +84,7 @@ class Framebuffer32(Framebuffer):
         return Image.merge('RGBA', (b, g, r, a)).tobytes()
 
     def show(self, buffer_idx):
-        self.map[:] = self.buffer[buffer_idx]
+        self.map[:] = self.buffers[buffer_idx]
 
 
 class FramebufferNull(Framebuffer):
