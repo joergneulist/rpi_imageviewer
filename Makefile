@@ -9,7 +9,8 @@ BUILDROOT_BASE_CONFIG=$(HOST_PATH_BUILDROOT)/configs/raspberrypi_defconfig
 
 # Paths inside the target filesystem
 TARGET_PATH_PYTHON=/opt/imvi
-TARGET_PATH_CONFIG=/etc
+TARGET_PATH_CONFIG=/etc/imvi
+TARGET_PATH_ASSETS=/opt/imvi/assets
 
 # Target image configuration
 TARGET_HOSTNAME=imvi
@@ -35,11 +36,13 @@ BUILDROOT_FINAL_CONFIG_FILE=$(HOST_PATH_BUILDROOT)/configs/$(BUILDROOT_FINAL_CON
 
 SOURCE_PYTHON = $(wildcard src/*.py)
 SOURCE_CONFIG = $(wildcard etc/*)
+SOURCE_ASSETS = $(wildcard assets/*.png)
 SOURCE_BUILDROOT = buildroot_tailoring
 SOURCE_BR_CONFIG_PATCH = $(SOURCE_BUILDROOT)/configs/config_patch
 SOURCE_BR_BOARD = $(SOURCE_BUILDROOT)/board
 TARGET_OVERLAY_PYTHON=$(patsubst src/%,$(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_PYTHON)/%, $(SOURCE_PYTHON))
 TARGET_OVERLAY_CONFIG=$(patsubst etc/%,$(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_CONFIG)/%, $(SOURCE_CONFIG))
+TARGET_OVERLAY_ASSETS=$(patsubst assets/%,$(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_ASSETS)/%, $(SOURCE_ASSETS))
 
 ###############################################################################
 
@@ -108,6 +111,10 @@ $(TARGET_OVERLAY_PYTHON): $(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_PYTHON)/%: sr
 	cp $< $@
 
 $(TARGET_OVERLAY_CONFIG): $(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_CONFIG)/%: etc/%
+	mkdir -p $(dir $@)
+	cp $< $@
+
+$(TARGET_OVERLAY_ASSETS): $(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_ASSETS)/%: assets/%
 	mkdir -p $(dir $@)
 	cp $< $@
 

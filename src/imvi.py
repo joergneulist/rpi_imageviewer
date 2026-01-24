@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # EVALUATE CACHE STRATEGIES
 # ADD OVERVIEW MODE
@@ -39,9 +39,11 @@ EVT_Q_PARAMS = 'params'
 
 def parse_args():
     parser = argparse.ArgumentParser(description=MY_NAME)
-    parser.add_argument('-c', '--config', help='Override path to config file', default='/etc/imvi.json')
+    parser.add_argument('-c', '--config', help='Override path to config file', default='/etc/imvi/imvi.json')
     parser.add_argument('-d', '--debug', action='store_true', help='Activate debug mode: implies -v, suppresses actual framebuffer output')
     parser.add_argument('-p', '--path', action='append', help='Add a file path to display; can be named multiple times', default=[])
+    parser.add_argument('-s', '--splash', help='Splash image to display on startup. Specifiying something that is not a valid image file will disable splash',
+                        default=Path(__file__).parents[0] / 'assets/logo.png')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
     args = parser.parse_args()
     args.verbose = args.debug or args.verbose
@@ -167,8 +169,15 @@ if __name__ == '__main__':
     print('config:', args.config)
     print(config)
     
+    # load splash image
+    fb = Framebuffer.assign(0, args.debug)
+    splash = Path(args.splash)
+    if FileList.is_valid(splash):
+        buffer = fb.prepare(splash)
+        fb.show(buffer)
+
     # set up central object
-    main = StateMachine(config, Framebuffer.assign(0, args.debug), args.verbose)
+    main = StateMachine(config, fb, args.verbose)
     
     # preload image files given as parameter
     for path in args.path:

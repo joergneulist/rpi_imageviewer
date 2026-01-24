@@ -6,6 +6,10 @@ SUPPORTED_FORMATS = {'.bmp', '.gif', '.jpeg', '.jpg', '.png', '.tif', '.tiff', '
 
 
 class FileList:
+    @staticmethod
+    def is_valid(path):
+        return path.is_file() and path.suffix.lower() in SUPPORTED_FORMATS
+
     def __init__(self):
         self.files = []
         self.update()
@@ -38,7 +42,7 @@ class FileList:
             for node in directories.popleft().iterdir():
                 if node.is_dir():
                     directories.append(node)
-                elif node.is_file() and node.suffix.lower() in SUPPORTED_FORMATS:
+                elif self.is_valid(node):
                     self.files.append((path, node))
         self.update()
 
