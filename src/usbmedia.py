@@ -45,13 +45,11 @@ class USBMediaKeeper:
     def __str__(self):
         return f'{str(type(self))}: currently mounted: ' +  ', '.join([f'{uuid}@{path}' for uuid, path in self.mounted_devices.items()])
 
-
     def mount(self, uuid, dev, fs):
         self.mounted_devices[uuid] = MEDIA_PATH / uuid
         self.mounted_devices[uuid].mkdir(parents=True, exist_ok=False)
         self.libc.mount(dev, self.mounted_devices[uuid], fs)
         return self.mounted_devices[uuid]
-
 
     def umount(self, uuid):
         if uuid not in self.mounted_devices:
@@ -62,7 +60,6 @@ class USBMediaKeeper:
         path = self.mounted_devices[uuid]
         del self.mounted_devices[uuid]
         return path
-
 
     def udev_event(self, action, device):
         if device.get('ID_BUS') == 'usb' and device.get('DEVTYPE') == 'partition':

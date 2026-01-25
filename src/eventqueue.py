@@ -36,6 +36,7 @@ class EventQueue:
         self.fallback_image = splash
         self.images = ImageBuffer()
         self.framebuffer = framebuffer
+        self.usb = USBMediaKeeper(self.cb_dev_mounted, self.cb_dev_unmounted)
 
         # register triggers for media control
         self.buttons = buttons
