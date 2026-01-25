@@ -8,9 +8,9 @@ BUILDROOT_VERSION=buildroot-2025.11.1
 BUILDROOT_BASE_CONFIG=$(HOST_PATH_BUILDROOT)/configs/raspberrypi_defconfig
 
 # Paths inside the target filesystem
+TARGET_EXECUTABLE=/usr/bin
 TARGET_PATH_PYTHON=/opt/imvi
 TARGET_PATH_CONFIG=/etc
-TARGET_PATH_BIN=/usr/bin
 TARGET_PATH_ASSETS=/opt/imvi/assets
 
 # Target image configuration
@@ -35,7 +35,7 @@ BUILDROOT_FINAL_CONFIG_FILE=$(HOST_PATH_BUILDROOT)/configs/$(BUILDROOT_FINAL_CON
 # MAKEFILE INTERNALS & SOURCES
 # Better not touch
 
-SOURCE_ENTRY_POINT = imvi.py
+SOURCE_ENTRY_POINT = main.py
 SOURCE_PYTHON = $(wildcard src/*.py)
 SOURCE_CONFIG = $(wildcard etc/*/*)
 SOURCE_ASSETS = $(wildcard assets/*.png)
@@ -44,7 +44,7 @@ SOURCE_BR_CONFIG_PATCH = $(SOURCE_BUILDROOT)/configs/config_patch
 SOURCE_BR_BOARD = $(SOURCE_BUILDROOT)/board
 TARGET_OVERLAY_PYTHON=$(patsubst src/%,$(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_PYTHON)/%, $(SOURCE_PYTHON))
 TARGET_OVERLAY_CONFIG=$(patsubst etc/%,$(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_CONFIG)/%, $(SOURCE_CONFIG))
-TARGET_OVERLAY_BIN=$(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_BIN)/imvi
+TARGET_OVERLAY_BIN=$(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_EXECUTABLE)
 TARGET_OVERLAY_ASSETS=$(patsubst assets/%,$(HOST_PATH_SYSTEM_OVERLAY)$(TARGET_PATH_ASSETS)/%, $(SOURCE_ASSETS))
 
 ###############################################################################
