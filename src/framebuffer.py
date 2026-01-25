@@ -21,7 +21,7 @@ def get_size(size):
 
 
 class Framebuffer(object):
-    # Raspbian Pi 1B has this framebuffer mode:
+    # Raspbian on Pi 1B has this framebuffer mode:
     # geometry 1920 1200 1920 1200 16
     # rgba 5/11,6/5,5/0,0/0
     # Buildroot gives me this:
@@ -46,6 +46,13 @@ class Framebuffer(object):
             return Framebuffer32(dev, size)
         else:
             raise ValueError(f'Unsupported framebuffer depth: {depth}')
+
+
+    @staticmethod
+    def is_valid_img(path):
+        # set of supported file suffixes
+        SUPPORTED_FORMATS = {'.bmp', '.gif', '.jpeg', '.jpg', '.png', '.tif', '.tiff', '.webp'}
+        return path.is_file() and path.suffix.lower() in SUPPORTED_FORMATS
 
 
     def __init__(self, dev, size):

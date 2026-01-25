@@ -1,24 +1,14 @@
-#!/usr/bin/python3
 
-# EVALUATE CACHE STRATEGIES
-# ADD OVERVIEW MODE
-
-import argparse
 from collections import deque
-import json
 from pathlib import Path
-from sys import argv, path
 from time import sleep, time
 
-from framebuffer import Framebuffer, get_size
 from media import FileList
 from usbmedia import USBMediaKeeper
 
 
-CFG_KEY_PINS = 'pins'
 BTN_NEXT = 'next'
 BTN_PREV = 'prev'
-MY_NAME = 'IMVI - Python Image Viewer for Embedded Systems'
 
 EVT_BUTTON = 'button'
 EVT_BUTTON_LONG = 'long'
@@ -36,47 +26,14 @@ EVT_Q_EVT = 'evt'
 EVT_Q_TYPE = 'type'
 EVT_Q_PARAMS = 'params'
 
-PATH_ASSETS = Path(__file__).parents[0] / 'assets'
-PATH_CONFIG = Path('/etc/imvi')
 
-
-def parse_args():
-    parser = argparse.ArgumentParser(description=MY_NAME)
-    parser.add_argument('-c', '--config', help='Override path to config file',
-                        default=PATH_CONFIG / 'imvi.json')
-    parser.add_argument('-d', '--debug', action='store_true', help='Activate debug mode: implies -v, suppresses actual framebuffer output')
-    parser.add_argument('-p', '--path', action='append', help='Add a file path to display; can be named multiple times', default=[])
-    parser.add_argument('-s', '--splash', help='Splash image to display on startup. Specifiying something that is not a valid image file will disable splash',
-                        default=PATH_ASSETS / 'logo.png')
-    parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
-    args = parser.parse_args()
-    args.verbose = args.debug or args.verbose
-    return args
-
-
-def read_config(path):
-    # TODO better encapsulation and validation of config
-    with open(path, 'r') as f:
-        cfg = json.load(f)
-    
-    assert CFG_KEY_PINS in cfg
-    return cfg
-
-
-class StateMachine:
-    '''State machine for the image viewer
-    
-    Full State Machine TODO. Currently, the two buttons just step through the images backwards and forwards.
-    '''
+class EventQueue:
     def __init__(self, config, framebuffer, verbose=False):
         self.event_queue = deque()
         self.config = config
         self.verbose = verbose
         self.fileTracker = FileList()
         self.framebuffer = framebuffer
-        if self.verbose: print(self.framebuffer)
-        self.usbWatcher = USBMediaKeeper(self.cb_dev_mounted, self.cb_dev_unmounted)
-        if self.verbose: print(self.usbWatcher)
 
         # register triggers for media control
         try:
@@ -128,7 +85,8 @@ class StateMachine:
                     self.fileTracker.next()
                 elif evparams[0] == BTN_PREV:
                     self.fileTracker.prev()
-                self.add_event(EVT_IMAGE, EVT_IMAGE_TRIGGER, self.fileTracker.get_file())
+                if file := self.fileTracker.get_file() is not None:
+                    self.add_event(EVT_IMAGE, EVT_IMAGE_TRIGGER, file)
             
             elif event == EVT_IMAGE:
                 if evtype == EVT_IMAGE_TRIGGER:
@@ -165,27 +123,3 @@ class StateMachine:
     def cb_dev_mounted(self, path):  self.add_event(EVT_MEDIA,  EVT_MEDIA_LOAD,   path)
     def cb_dev_unmounted(self, path):self.add_event(EVT_MEDIA,  EVT_MEDIA_UNLOAD, path)
 
-
-if __name__ == '__main__':
-    args = parse_args()
-    config = read_config(Path(args.config))
-    print(MY_NAME)
-    print('config:', args.config)
-    print(config)
-    
-    # load splash image
-    fb = Framebuffer.assign(0, args.debug)
-    splash = Path(args.splash)
-    if FileList.is_valid(splash):
-        buffer = fb.prepare(splash)
-        fb.show(buffer)
-
-    # set up central object
-    main = StateMachine(config, fb, args.verbose)
-    
-    # preload image files given as parameter
-    for path in args.path:
-        main.cb_dev_mounted(Path(path))
-
-    # Enter the main loop
-    main.loop()

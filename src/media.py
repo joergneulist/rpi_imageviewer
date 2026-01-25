@@ -1,15 +1,9 @@
 from collections import deque
 
 
-# Alphabetically ordered list of supported file suffixes
-SUPPORTED_FORMATS = {'.bmp', '.gif', '.jpeg', '.jpg', '.png', '.tif', '.tiff', '.webp'}
 
 
 class FileList:
-    @staticmethod
-    def is_valid(path):
-        return path.is_file() and path.suffix.lower() in SUPPORTED_FORMATS
-
     def __init__(self):
         self.files = []
         self.update()
