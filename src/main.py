@@ -12,8 +12,9 @@ import argparse
 import json
 from pathlib import Path
 
-from eventqueue import EventQueue
+from eventqueue import EventQueue, BTN_NEXT, BTN_PREV
 from framebuffer import Framebuffer
+from images import ImageEntry
 
 
 CFG_KEY_PINS = 'pins'
@@ -26,48 +27,70 @@ def parse_args():
     parser = argparse.ArgumentParser(description=MY_NAME)
     parser.add_argument('-c', '--config', help='Override path to config file',
                         default=PATH_CONFIG / 'imvi.json')
-    parser.add_argument('-d', '--debug', action='store_true', help='Activate debug mode: implies -v, suppresses actual framebuffer output')
     parser.add_argument('-p', '--path', action='append', help='Add a file path to display; can be named multiple times', default=[])
     parser.add_argument('-s', '--splash', help='Splash image to display on startup. Specifiying something that is not a valid image file will disable splash',
                         default=PATH_ASSETS / 'logo.png')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
     args = parser.parse_args()
-    args.verbose = args.debug or args.verbose
     return args
 
 
-def read_config(path):
-    # TODO better encapsulation and validation of config
+def read_config(path, verbose=False):
+    if verbose:
+        print('config:', args.config)
     with open(path, 'r') as f:
         cfg = json.load(f)
-    
+    if verbose:
+        print(cfg)
     assert CFG_KEY_PINS in cfg
     return cfg
 
 
-def load_splash(fb, path):
-    if fb.is_valid_img(path):
-        buffer = fb.load(path)
-        fb.show(buffer)
-    
+def get_framebuffer(verbose=False):
+    framebuffer = Framebuffer.assign()
+    if verbose:
+        print(framebuffer)
+
+    return framebuffer
+
+def get_gpio_driver(config, verbose=False):
+    try:
+        from input import ButtonHandler
+        handlers = {}
+        for button in [BTN_PREV, BTN_NEXT]:
+            handlers[button] = ButtonHandler(config[button], button)
+            if verbose:
+                print(handlers[button])
+        return handlers
+    except Exception as ex:
+        if verbose:
+            print('GPIO-Handlers failed!')
+            print(ex, repr(ex))
+
+
+def load_splash(path, fb, verbose=False):
+    if verbose:
+        print(f'splash {path}')
+    if ImageEntry.is_valid_img(path):
+        img = ImageEntry(None, path)
+        print('...is valid')
+        fb.load(img)
+        print('...is loaded')
+        fb.show(img)
+        print('...is shown')
+        return img
+
 
 if __name__ == '__main__':
-    args = parse_args()
-    config = read_config(Path(args.config))
     print(MY_NAME)
-    print('config:', args.config)
-    print(config)
-    
-    # Create framebuffer adapter
-    fb = Framebuffer.assign(0, args.debug)
-    if args.verbose:
-        print(fb)
-
-    # Load splash image
-    load_splash(fb,  Path(args.splash))
+    args = parse_args()
+    cfg = read_config(Path(args.config), args.verbose)
+    fb = get_framebuffer(args.verbose)
+    btn = get_gpio_driver(cfg[CFG_KEY_PINS], args.verbose)
+    splash = load_splash(Path(args.splash), fb, args.verbose)
 
     # set up central object
-    eq = EventQueue(config, fb, args.verbose)
+    eq = EventQueue(fb, btn, splash, args.verbose)
     
     # preload image files given as parameter
     for path in args.path:

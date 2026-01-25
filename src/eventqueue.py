@@ -1,10 +1,11 @@
 
 from collections import deque
 from dataclasses import dataclass
-from enum import Enum
+from enum import auto, Enum
 from pathlib import Path
 from time import sleep, time
 
+from images import ImageBuffer
 from usbmedia import USBMediaKeeper
 
 
@@ -13,13 +14,13 @@ BTN_PREV = 'prev'
 
 
 class Event(Enum):
-    Idle        =  0
-    ButtonShort = 11
-    ButtonLong  = 12
-    ImageLoad   = 21
-    ImageShow   = 22
-    MediaLoad   = 31
-    MediaUnload = 32
+    Idle        = auto()
+    ButtonShort = auto()
+    ButtonLong  = auto()
+    ImageLoad   = auto()
+    ImageShow   = auto()
+    MediaLoad   = auto()
+    MediaUnload = auto()
 
 
 @dataclass
@@ -29,52 +30,34 @@ class EventEntry:
 
 
 class EventQueue:
-    def __init__(self, config, framebuffer, verbose=False):
+    def __init__(self, framebuffer, buttons, splash, verbose=False):
         self.event_queue = deque()
-        self.config = config
         self.verbose = verbose
-        self.files = []
-        self.fileActive = 0
+        self.fallback_image = splash
+        self.images = ImageBuffer()
         self.framebuffer = framebuffer
-        self.bored_since = time()
 
         # register triggers for media control
-        try:
-            from input import ButtonHandler
-            self.btn_handlers = {}
-            for button in [BTN_PREV, BTN_NEXT]:
-                self.btn_handlers[button] = ButtonHandler(self.config['pins'][button], button, self.cb_btn_short, self.cb_btn_long)
-                if self.verbose:
-                    print(self.btn_handlers[button])
-        except Exception:
-            self.btn_handlers = None
-            if self.verbose:
-                print('GPIO-Handlers failed!')
-    
-    
-    def get_active_file(self):
-        if len(self.files) > self.fileActive:
-            return self.files[self.fileActive][1]
+        self.buttons = buttons
+        if buttons is not None:
+            for button in self.buttons:
+                button.set_callbacks(self.cb_btn_short, self.cb_btn_long)
 
 
     def process_idle_event(self, _):
-        # empty queue -> let's catch up on sleep!
-        sleep(0.1)
-
-        # debug mode: simulate button inputs
-        if self.btn_handlers is None and time() - self.bored_since > 10.0:
-            self.add_event(Event.ButtonShort, BTN_NEXT)                    
-            self.bored_since = time()
+        if (img := self.images.get_next_uncached()) is not None:
+            self.add_event(Event.ImageLoad, img)
+        else:
+            # empty queue -> let's catch up on sleep!
+            sleep(0.2)
 
 
     def process_button_short_event(self, name):
         if name == BTN_NEXT:
-            if n := len(self.files) > 0:
-                self.active = (self.fileActive + 1) % n
+            self.images.next()
         elif name == BTN_PREV:
-            if n := len(self.files) > 0:
-                self.active = (self.fileActive + n - 1) % n
-        self.add_event(Event.ImageLoad, self.get_active_file())
+            self.image.prev()
+        self.add_event(Event.ImageShow, self.images.get_current())
 
 
     def process_button_long_event(self, name):
@@ -82,34 +65,27 @@ class EventQueue:
         self.process_button_short_event(name)
 
 
-    def process_image_load_event(self, path):
-        if path is not None:
-            buffer = self.framebuffer.load(path)
-            self.add_event(Event.ImageShow, buffer)
+    def process_image_load_event(self, img):
+        self.framebuffer.load(img)
 
 
-    def process_image_show_event(self, buffer):
-        self.framebuffer.show(buffer)
+    def process_image_show_event(self, img):
+        if img is not None:
+            self.framebuffer.show(img)
+        else:
+            self.framebuffer.show(self.fallback_image)
 
 
     def process_media_load_event(self, path):
-        directories = deque([path])
-        while len(directories):
-            for node in directories.popleft().iterdir():
-                if node.is_dir():
-                    directories.append(node)
-                elif self.framebuffer.is_valid_img(node):
-                    self.files.append((path, node))
-        self.activeFile = 0
+        self.images.add_path(path)
         # TODO don't switch view if not necessary!
-        self.add_event(Event.ImageLoad, self.get_active_file())
+        self.add_event(Event.ImageShow, self.images.get_current())
 
 
     def process_media_show_event(self, path):
-        self.files = [entry for entry in self.files if entry[0] != path]
-        self.activeFile = 0
+        self.images.drop_path(path)
         # TODO don't switch view if not necessary!
-        self.add_event(Event.ImageLoad, self.get_active_file())
+        self.add_event(Event.ImageShow, self.images.get_current())
 
 
     def add_event(self, event, *params):

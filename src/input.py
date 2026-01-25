@@ -6,7 +6,7 @@ SHORT_PRESS_TIME = 0.1
 LONG_PRESS_TIME = 1.0
 
 class ButtonHandler:
-    def __init__(self, pin, name, cb_short, cb_long=None):
+    def __init__(self, pin, name, cb_short=None, cb_long=None):
         self.name = name
         self.cb_short = cb_short
         self.cb_long = cb_long
@@ -19,6 +19,10 @@ class ButtonHandler:
         self.btn.when_held = self._held
         self.btn.when_pressed = self._pressed
         self.btn.when_released = self._released
+    
+    def set_callbacks(self, cb_short, cb_long=None):
+        self.cb_short = cb_short
+        self.cb_long = cb_long
 
     def __str__(self):
         return f'{str(type(self))}: {self.name} (GPIO {self.btn.pin})'
