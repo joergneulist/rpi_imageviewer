@@ -5,7 +5,6 @@ from enum import Enum
 from pathlib import Path
 from time import sleep, time
 
-from media import FileList
 from usbmedia import USBMediaKeeper
 
 
@@ -34,7 +33,8 @@ class EventQueue:
         self.event_queue = deque()
         self.config = config
         self.verbose = verbose
-        self.fileTracker = FileList()
+        self.files = []
+        self.fileActive = 0
         self.framebuffer = framebuffer
         self.bored_since = time()
 
@@ -50,6 +50,11 @@ class EventQueue:
             self.btn_handlers = None
             if self.verbose:
                 print('GPIO-Handlers failed!')
+    
+    
+    def get_active_file(self):
+        if len(self.files) > self.fileActive:
+            return self.files[self.fileActive][1]
 
 
     def process_idle_event(self, _):
@@ -64,10 +69,12 @@ class EventQueue:
 
     def process_button_short_event(self, name):
         if name == BTN_NEXT:
-            self.fileTracker.next()
+            if n := len(self.files) > 0:
+                self.active = (self.fileActive + 1) % n
         elif name == BTN_PREV:
-            self.fileTracker.prev()
-        self.add_event(Event.ImageLoad, self.fileTracker.get_file())
+            if n := len(self.files) > 0:
+                self.active = (self.fileActive + n - 1) % n
+        self.add_event(Event.ImageLoad, self.get_active_file())
 
 
     def process_button_long_event(self, name):
@@ -86,15 +93,23 @@ class EventQueue:
 
 
     def process_media_load_event(self, path):
-        self.fileTracker.load(path)
+        directories = deque([path])
+        while len(directories):
+            for node in directories.popleft().iterdir():
+                if node.is_dir():
+                    directories.append(node)
+                elif self.framebuffer.is_valid_img(node):
+                    self.files.append((path, node))
+        self.activeFile = 0
         # TODO don't switch view if not necessary!
-        self.add_event(Event.ImageShow, self.fileTracker.get_file())
+        self.add_event(Event.ImageLoad, self.get_active_file())
 
 
     def process_media_show_event(self, path):
-        self.fileTracker.unload(path)
+        self.files = [entry for entry in self.files if entry[0] != path]
+        self.activeFile = 0
         # TODO don't switch view if not necessary!
-        self.add_event(Event.ImageShow, self.fileTracker.get_file())
+        self.add_event(Event.ImageLoad, self.get_active_file())
 
 
     def add_event(self, event, *params):

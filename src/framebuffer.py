@@ -64,7 +64,7 @@ class Framebuffer(object):
     def __str__(self):
         return f'<{str(type(self))}: {self.dev} size={self.size}>'
 
-    def prepare(self, file_path):
+    def load(self, file_path):
         image = Image.open(file_path)
         if image.width < image.height:
             image = image.transpose(Image.ROTATE_270)

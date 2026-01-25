@@ -47,7 +47,7 @@ def read_config(path):
 
 def load_splash(fb, path):
     if fb.is_valid_img(path):
-        buffer = fb.prepare(path)
+        buffer = fb.load(path)
         fb.show(buffer)
     
 
