@@ -7,7 +7,7 @@ set -e
 if [ -e ${TARGET_DIR}/etc/inittab ]; then
     grep -qE '^tty1::' ${TARGET_DIR}/etc/inittab || \
 	sed -i '/GENERIC_SERIAL/a\
-tty1::respawn:/usr/bin/python3 '$2'/imvi.py\
+tty1::respawn:'$2' &>> /var/log/imvi.log \
 tty2::respawn:/sbin/getty -L tty2 0 vt100 # HDMI console' ${TARGET_DIR}/etc/inittab
 # systemd doesn't use /etc/inittab, enable getty.tty1.service instead
 elif [ -d ${TARGET_DIR}/etc/systemd ]; then
