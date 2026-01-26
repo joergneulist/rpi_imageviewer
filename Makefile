@@ -8,7 +8,7 @@ BUILDROOT_VERSION=buildroot-2025.11.1
 BUILDROOT_BASE_CONFIG=$(HOST_PATH_BUILDROOT)/configs/raspberrypi_defconfig
 
 # Paths inside the target filesystem
-TARGET_EXECUTABLE=/usr/bin
+TARGET_EXECUTABLE=/usr/bin/imvi
 TARGET_PATH_PYTHON=/opt/imvi
 TARGET_PATH_CONFIG=/etc
 TARGET_PATH_ASSETS=/opt/imvi/assets
