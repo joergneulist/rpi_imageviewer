@@ -19,7 +19,7 @@ from images import ImageEntry
 
 CFG_KEY_PINS = 'pins'
 MY_NAME = 'IMVI - Python Image Viewer for Embedded Systems'
-PATH_ASSETS = Path(__file__).parents[0] / 'assets'
+PATH_ASSETS = Path('/opt/imvi/assets')
 PATH_CONFIG = Path('/etc/imvi')
 
 
