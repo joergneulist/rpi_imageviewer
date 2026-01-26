@@ -41,7 +41,7 @@ class EventQueue:
         # register triggers for media control
         self.buttons = buttons
         if buttons is not None:
-            for button in self.buttons:
+            for button in self.buttons.values():
                 button.set_callbacks(self.cb_btn_short, self.cb_btn_long)
 
 
