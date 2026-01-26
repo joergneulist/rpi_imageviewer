@@ -25,5 +25,5 @@ gpu_mem_1024=100
 # Run as fast as firmware / board allows
 arm_boost=1
 
-[all]
-disable_spash=1
+# Remove GPU test image
+disable_splash=1
