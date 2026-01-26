@@ -1,4 +1,3 @@
-
 from collections import deque
 from dataclasses import dataclass
 from enum import auto, Enum

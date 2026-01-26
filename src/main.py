@@ -1,12 +1,7 @@
-#!/usr/bin/python3
-
-# 1. CLEAN UP EVENT QUEUE HANDLER - SMALLER FUNCTIONS, CLEARER RESPONSIBILITY
-# 2. REFACTOR RESPONSIBILITIES OF SUBCLASSES - DO WE NEED MEDIA HANDLER STILL?
-# 3. MAKE CACHE HANDLING EXPLICIT, AND ABLE TO KEEP INTERNAL SCREENS IN MEMORY, WHILE OPTIMIZING DISPLAY FOR EVERYTHING ELSE
-# 4. ADD WAITING SCREEN
-# 5. EVALUATE ABILITY FOR GIF ANIMATIONS
-# 6. ADD TEXT RENDERING FOR WAITING SCREENS
-# 8. PEP8 - STRICT TYPING, FORMATTING, ETC.
+# . EVALUATE ABILITY FOR GIF ANIMATIONS
+# . ADD TEXT RENDERING FOR WAITING SCREENS
+# . MEASURE IMAGE TIMES (LOAD, CONVERT, COPY TO FB) => EVALUATE PERSISTENT CACHE
+# . PEP8 - STRICT TYPING, FORMATTING, ETC.
 
 import argparse
 import json
@@ -19,7 +14,7 @@ from images import ImageEntry
 
 CFG_KEY_PINS = 'pins'
 MY_NAME = 'IMVI - Python Image Viewer for Embedded Systems'
-PATH_ASSETS = Path('/opt/imvi/assets')
+PATH_ASSETS = Path(__file__).parents[0] / 'assets'
 PATH_CONFIG = Path('/etc/imvi')
 
 
@@ -31,8 +26,7 @@ def parse_args():
     parser.add_argument('-s', '--splash', help='Splash image to display on startup. Specifiying something that is not a valid image file will disable splash',
                         default=PATH_ASSETS / 'logo.png')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def read_config(path, verbose=False):
