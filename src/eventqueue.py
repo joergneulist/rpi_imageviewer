@@ -43,6 +43,8 @@ class EventQueue:
             for button in self.buttons.values():
                 button.set_callbacks(self.cb_btn_short, self.cb_btn_long)
 
+        self.add_event(Event.ImageShow, self.images.get_current())
+
 
     def process_idle_event(self, _):
         if (img := self.images.get_next_uncached()) is not None:
@@ -82,7 +84,7 @@ class EventQueue:
         self.add_event(Event.ImageShow, self.images.get_current())
 
 
-    def process_media_show_event(self, path):
+    def process_media_drop_event(self, path):
         self.images.drop_path(path)
         # TODO don't switch view if not necessary!
         self.add_event(Event.ImageShow, self.images.get_current())
@@ -111,7 +113,7 @@ class EventQueue:
             Event.ImageLoad:   self.process_image_load_event,
             Event.ImageShow:   self.process_image_show_event,
             Event.MediaLoad:   self.process_media_load_event,
-            Event.MediaUnload: self.process_media_show_event
+            Event.MediaUnload: self.process_media_drop_event
         }
         next_task = self.get_event()
         EVT_HANDLERS[next_task.event](next_task.params)

@@ -66,10 +66,7 @@ def load_splash(path, fb, verbose=False):
     if verbose:
         print(f'splash {path}')
     if ImageEntry.is_valid_img(path):
-        img = ImageEntry(None, path)
-        fb.load(img)
-        fb.show(img)
-        return img
+        return ImageEntry(None, path)
 
 
 if __name__ == '__main__':

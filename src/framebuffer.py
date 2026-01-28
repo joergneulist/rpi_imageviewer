@@ -61,10 +61,10 @@ class Framebuffer(object):
     def show(self, image_data):
         if self.showing != image_data:
             self.showing = image_data
-        if image_data is not None:
-            if image_data.buffer is None:
-                self.load(image_data)
-            self._show(image_data)
+            if image_data is not None:
+                if image_data.buffer is None:
+                    self.load(image_data)
+                self._show(image_data)
 
 
 class Framebuffer32(Framebuffer):
