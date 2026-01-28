@@ -88,4 +88,5 @@ if __name__ == '__main__':
         eq.cb_dev_mounted(Path(path))
 
     # Enter the main loop
-    eq.loop()
+    while True:
+        eq.tick()

@@ -56,7 +56,7 @@ class EventQueue:
         if name == BTN_NEXT:
             self.images.next()
         elif name == BTN_PREV:
-            self.image.prev()
+            self.images.prev()
         self.add_event(Event.ImageShow, self.images.get_current())
 
 
@@ -103,19 +103,18 @@ class EventQueue:
         return evt
 
 
-    def loop(self):
-        while True:
-            EVT_HANDLERS = {
-                Event.Idle:        self.process_idle_event,
-                Event.ButtonShort: self.process_button_short_event,
-                Event.ButtonLong:  self.process_button_long_event,
-                Event.ImageLoad:   self.process_image_load_event,
-                Event.ImageShow:   self.process_image_show_event,
-                Event.MediaLoad:   self.process_media_load_event,
-                Event.MediaUnload: self.process_media_show_event
-            }
-            next_task = self.get_event()
-            EVT_HANDLERS[next_task.event](next_task.params)
+    def tick(self):
+        EVT_HANDLERS = {
+            Event.Idle:        self.process_idle_event,
+            Event.ButtonShort: self.process_button_short_event,
+            Event.ButtonLong:  self.process_button_long_event,
+            Event.ImageLoad:   self.process_image_load_event,
+            Event.ImageShow:   self.process_image_show_event,
+            Event.MediaLoad:   self.process_media_load_event,
+            Event.MediaUnload: self.process_media_show_event
+        }
+        next_task = self.get_event()
+        EVT_HANDLERS[next_task.event](next_task.params)
 
 
     def cb_btn_long(self, name):     self.add_event(Event.ButtonLong,  name)
