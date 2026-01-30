@@ -92,8 +92,8 @@ class ThreadMessageQueue(deque):
 class IMVIAdapter(Thread):
     def __init__(self):
         super().__init__()
-        self.msg_in = ThreadMessageQueue('main2thread', True)
-        self.msg_out = ThreadMessageQueue('thread2main', True)
+        self.msg_in = ThreadMessageQueue('main2thread')
+        self.msg_out = ThreadMessageQueue('thread2main')
         fb = FramebufferKivy(self.msg_out)
         splash = ImageEntry(None, SPLASH_PATH) if ImageEntry.is_valid_img(SPLASH_PATH) else None
         print(SPLASH_PATH, ImageEntry.is_valid_img(SPLASH_PATH))
@@ -112,9 +112,9 @@ class IMVIAdapter(Thread):
                         self.btn[msg['name']]._released()
                 elif msg['press']:
                     if msg['name'] == BTN_MOUNT:
-                        self.eq.cb_dev_mounted(msg['param'])
+                        self.eq.cb_dev_mounted(Path(msg['param']))
                     elif msg['name'] == BTN_UMOUNT:
-                        self.eq.cb_dev_unmounted(msg['param'])
+                        self.eq.cb_dev_unmounted(Path(msg['param']))
                     else:
                         running = False
     
