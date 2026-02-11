@@ -16,15 +16,17 @@ SPLASH_PATH = Path(__file__).parents[1] / 'assets' / 'logo.png'
 
 
 class FramebufferKivy(Framebuffer):
-    def __init__(self, msg_queue):
+    def __init__(self, msg_queue, verbose=False):
         super().__init__(FB_TAG, SIZE)
         self.msg_queue = msg_queue
+        self.verbose = verbose
     
     def _encode(self, image):
         return image
 
     def _show(self, image_data):
-        print(f'Displaying buffer {image_data.filepath}: {image_data.buffer is not None}')
+        if self.verbose:
+            print(f'Displaying buffer {image_data.filepath}: {image_data.buffer is not None}')
         self.msg_queue.send(image_data.buffer)
 
 
@@ -92,14 +94,13 @@ class ThreadMessageQueue(deque):
 class IMVIAdapter(Thread):
     def __init__(self):
         super().__init__()
-        self.msg_in = ThreadMessageQueue('main2thread')
-        self.msg_out = ThreadMessageQueue('thread2main')
-        fb = FramebufferKivy(self.msg_out)
+        self.msg_in = ThreadMessageQueue('main2thread', verbose=False)
+        self.msg_out = ThreadMessageQueue('thread2main', verbose=False)
+        fb = FramebufferKivy(self.msg_out, verbose=False)
         splash = ImageEntry(None, SPLASH_PATH) if ImageEntry.is_valid_img(SPLASH_PATH) else None
-        print(SPLASH_PATH, ImageEntry.is_valid_img(SPLASH_PATH))
         self.btn = {name: ButtonKivy(name) for name in (BTN_PREV, BTN_NEXT)}
-        self.eq = EventQueue(fb, self.btn, splash, True)
-        
+        self.eq = EventQueue(fb, self.btn, splash, verbose=False)
+
     def run(self):
         running = True
         while running:

@@ -19,8 +19,9 @@ BUTTON_HEIGHT = 100
 
 
 class PathPicker(Popup):
-    def __init__(self, callback):
+    def __init__(self, callback, callback_args=None):
         self.callback = callback
+        self.callback_args = callback_args
         btn_select = Button(text='Select', size_hint=(1, None), height=BUTTON_HEIGHT)
         btn_select.bind(on_release=self._button)
         btn_cancel = Button(text='Cancel', size_hint=(1, None), height=BUTTON_HEIGHT)
@@ -45,7 +46,7 @@ class PathPicker(Popup):
             sel = self.chooser.selection
             path = sel[0] if sel else self.chooser.path
         self.dismiss()
-        self.callback(path)
+        self.callback(path, self.callback_args)
 
 
 class KivyApp(App):
@@ -61,29 +62,30 @@ class KivyApp(App):
             self.show_pillow_image(msg)
 
     def _press(self, btn):
+        message = {'press': True, 'name': btn.text}
         if btn.text == BTN_MOUNT:
             # show file chooser modal and handle selection asynchronously
-            popup = PathPicker(self._select_path)
+            popup = PathPicker(self._select_path, message)
         elif btn.text == BTN_UMOUNT:
             if self.loaded_path is not None:
                 # reset mount button text and notify adapter
                 self.btn_mount.text = BTN_MOUNT
-                self.msg_out.send({'press': True, 'name': BTN_UMOUNT, 'param': self.loaded_path})
+                self.msg_out.send(message | {'param': self.loaded_path})
                 self.loaded_path = None
-        elif btn.text == BTN_QUIT:
-            quit()
         else:
-            self.msg_out.send({'press': False, 'name': btn.text})
+            self.msg_out.send(message)
+            if btn.text == BTN_QUIT:
+                self.stop()
 
     def _release(self, btn):
         self.msg_out.send({'press': False, 'name': btn.text})
 
-    def _select_path(self, path):
+    def _select_path(self, path, message):
             self.loaded_path = path
             if self.loaded_path is not None:
                 # reset mount button text and notify adapter
                 self.btn_mount.text = BTN_UMOUNT
-                self.msg_out.send({'press': True, 'name': BTN_MOUNT, 'param': self.loaded_path})
+                self.msg_out.send(message | {'param': self.loaded_path})
 
     def make_button(self, text):
         button = Button(text=text, size_hint=(1, None), height=BUTTON_HEIGHT)
@@ -117,7 +119,9 @@ class KivyApp(App):
 
 
 adapt = IMVIAdapter()
-app = KivyApp(adapt.msg_in, adapt.msg_out)
+# Cross the wires: app receives from msg_out and sends to msg_in,
+# while adapt receives from msg_in and sends to msg_out
+app = KivyApp(msg_outgoing=adapt.msg_in, msg_incoming=adapt.msg_out) 
 adapt.start()
 app.run()
 adapt.join()
